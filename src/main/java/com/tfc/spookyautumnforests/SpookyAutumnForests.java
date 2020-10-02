@@ -74,9 +74,7 @@ public class SpookyAutumnForests {
 									});
 									worldIn.setBlockState(pos, state1.get());
 									worldIn.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1, 1, false);
-									if (!player.isCreative()) {
-										player.getHeldItem(handIn).damageItem(1, player, (p_220040_1_) -> p_220040_1_.sendBreakAnimation(handIn));
-									}
+									if (!player.isCreative()) player.getHeldItem(handIn).damageItem(1, player, (p_220040_1_) -> p_220040_1_.sendBreakAnimation(handIn));
 									player.swingArm(handIn);
 									return ActionResultType.PASS;
 								}
@@ -84,7 +82,7 @@ public class SpookyAutumnForests {
 							return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
 						}
 						
-						public <A extends Comparable<A>> BlockState applyProperty(BlockState sourceState, BlockState newState, Property<A> property) {
+						public <A extends Comparable<A>> @NotNull BlockState applyProperty(@NotNull BlockState sourceState, @NotNull BlockState newState, Property<A> property) {
 							return newState.with(property, sourceState.get(property));
 						}
 					};
