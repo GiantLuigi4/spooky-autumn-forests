@@ -1,29 +1,34 @@
 package com.tfc.spookyautumnforests;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.RotatedPillarBlock;
+import net.minecraft.block.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.TallBlockItem;
+import net.minecraft.state.Property;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.World;
+import net.minecraftforge.common.ToolType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod("spooky_autumn_forests")
 public class SpookyAutumnForests {
-	
-	// Directly reference a log4j logger.
-	private static final Logger LOGGER = LogManager.getLogger();
 	
 	public SpookyAutumnForests() {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -58,7 +63,55 @@ public class SpookyAutumnForests {
 				try {
 					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
 					get.setAccessible(true);
-					Block block = new RotatedPillarBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+					Block block = new RotatedPillarBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null))) {
+						@Override
+						public @NotNull ActionResultType onBlockActivated(@NotNull BlockState state, @NotNull World worldIn, @NotNull BlockPos pos, @NotNull PlayerEntity player, @NotNull Hand handIn, @NotNull BlockRayTraceResult hit) {
+							if (blocks.containsKey("stripped_"+sa[0])) {
+								if (player.getHeldItem(handIn).getToolTypes().contains(ToolType.AXE)) {
+									AtomicReference<BlockState> state1 = new AtomicReference<>(blocks.get("stripped_"+sa[0]).getDefaultState());
+									state.getProperties().forEach(property -> {
+										state1.set(applyProperty(state, state1.get(), property));
+									});
+									worldIn.setBlockState(pos, state1.get());
+									worldIn.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1, 1, false);
+									if (!player.isCreative()) {
+										player.getHeldItem(handIn).damageItem(1, player, (p_220040_1_) -> p_220040_1_.sendBreakAnimation(handIn));
+									}
+									player.swingArm(handIn);
+									return ActionResultType.PASS;
+								}
+							}
+							return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
+						}
+						
+						public <A extends Comparable<A>> BlockState applyProperty(BlockState sourceState, BlockState newState, Property<A> property) {
+							return newState.with(property, sourceState.get(property));
+						}
+					};
+					block.setRegistryName("spooky_autumn_forests", sa[0]);
+					blockRegistryEvent.getRegistry().register(block);
+					blocks.put(sa[0], block);
+				} catch (Throwable err) {
+					err.printStackTrace();
+				}
+			}
+			for (String[] sa : Blocks.doors) {
+				try {
+					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+					get.setAccessible(true);
+					Block block = new DoorBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+					block.setRegistryName("spooky_autumn_forests", sa[0]);
+					blockRegistryEvent.getRegistry().register(block);
+					blocks.put(sa[0], block);
+				} catch (Throwable err) {
+					err.printStackTrace();
+				}
+			}
+			for (String[] sa : Blocks.trapdoors) {
+				try {
+					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+					get.setAccessible(true);
+					Block block = new TrapDoorBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
 					block.setRegistryName("spooky_autumn_forests", sa[0]);
 					blockRegistryEvent.getRegistry().register(block);
 					blocks.put(sa[0], block);
@@ -71,12 +124,22 @@ public class SpookyAutumnForests {
 		@SubscribeEvent
 		public static void onItemsRegistry(final RegistryEvent.Register<Item> itemRegistryEvent) {
 			for (String[] sa : Blocks.regularBlocks) {
-				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties());
+				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.BUILDING_BLOCKS));
 				item.setRegistryName("spooky_autumn_forests", sa[0]);
 				itemRegistryEvent.getRegistry().register(item);
 			}
 			for (String[] sa : Blocks.logs) {
-				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties());
+				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.BUILDING_BLOCKS));
+				item.setRegistryName("spooky_autumn_forests", sa[0]);
+				itemRegistryEvent.getRegistry().register(item);
+			}
+			for (String[] sa : Blocks.trapdoors) {
+				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.REDSTONE));
+				item.setRegistryName("spooky_autumn_forests", sa[0]);
+				itemRegistryEvent.getRegistry().register(item);
+			}
+			for (String[] sa : Blocks.doors) {
+				Item item = new TallBlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.REDSTONE));
 				item.setRegistryName("spooky_autumn_forests", sa[0]);
 				itemRegistryEvent.getRegistry().register(item);
 			}
