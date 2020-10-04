@@ -1,28 +1,36 @@
 package com.tfc.spookyautumnforests;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.HashMap;
 
 public class Datagen {
 	private static final String file = System.getProperty("user.dir");
 	
 	public static void main(String[] args) throws IOException {
+		HashMap<String,String> tags = new HashMap<>();
 		StringBuilder lang = new StringBuilder("{");
-		for (String[] sa : Blocks.regularBlocks) {
+		for (String[] sa : Registries.regularBlocks) {
 			genBlock(sa[0]);
 			addLangEntry(sa[0],lang);
 		}
-		for (String[] sa : Blocks.logs) {
+		for (String[] sa : Registries.logs) {
 			genLogBlock(sa[0]);
-			addLangEntry(sa[0],lang);
+			addLangEntry(sa[0], lang);
+			String str;
+			str = tags.getOrDefault(sa[0].replace("stripped_", ""),
+					"{" +
+							"\"replace\":false," +
+							"\"values\":["
+			);
+			str += "\"spooky_autumn_forests:" + sa[0] + "\",";
+			if (!tags.containsKey(sa[0].replace("stripped_", ""))) tags.put(sa[0].replace("stripped_", ""), str);
+			else tags.replace(sa[0].replace("stripped_", ""), str);
 		}
-		for (String[] sa : Blocks.doors) {
+		for (String[] sa : Registries.doors) {
 			genDoorBlock(sa[0]);
 			addLangEntry(sa[0],lang);
 		}
-		for (String[] sa : Blocks.trapdoors) {
+		for (String[] sa : Registries.trapdoors) {
 			genTrapDoorBlock(sa[0]);
 			addLangEntry(sa[0],lang);
 		}
@@ -37,40 +45,122 @@ public class Datagen {
 			stream.write(lang.toString().replace(",§","").getBytes());
 			stream.close();
 		}
+		StringBuilder logsThatBurn = new StringBuilder(
+						"{" +
+								"\"replace\":false," +
+								"\"values\":["
+				);
+		{
+			tags.forEach((name,tag)->{
+				try {
+					tag+=("§]}");
+					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\tags\\blocks\\"+name+".json");
+					if (!f.exists()) {
+						f.getParentFile().mkdirs();
+						f.createNewFile();
+					}
+					FileOutputStream stream = new FileOutputStream(f);
+					stream.write(tag.replace(",§","").getBytes());
+					logsThatBurn.append("\"#spooky_autumn_forests:").append(name).append("\",");
+					stream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				try {
+					tag+=("§]}");
+					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\tags\\items\\"+name+".json");
+					if (!f.exists()) {
+						f.getParentFile().mkdirs();
+						f.createNewFile();
+					}
+					FileOutputStream stream = new FileOutputStream(f);
+					stream.write(tag.replace(",§","").getBytes());
+					logsThatBurn.append("\"#spooky_autumn_forests:").append(name).append("\",");
+					stream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
+			try {
+				logsThatBurn.append("§]}");
+				File f = new File(file + "\\src\\main\\resources\\data\\minecraft\\tags\\blocks\\logs_that_burn.json");
+				if (!f.exists()) {
+					f.getParentFile().mkdirs();
+					f.createNewFile();
+				}
+				FileOutputStream stream = new FileOutputStream(f);
+				stream.write(logsThatBurn.toString().replace(",§", "").getBytes());
+				stream.close();
+			}catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private static void genLogBlock(String name) {
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\block\\" + name + ".json");
-			if (!f.exists()) {
-				f.getParentFile().mkdirs();
-				f.createNewFile();
+			{
+				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\block\\" + name + ".json");
+				if (!f.exists()) {
+					f.getParentFile().mkdirs();
+					f.createNewFile();
+				}
+				FileWriter writer = new FileWriter(f);
+				writer.write(logMDL.replace("%name%", name));
+				writer.close();
 			}
-			FileWriter writer = new FileWriter(f);
-			writer.write(logMDL.replace("%name%", name));
-			writer.close();
-		} catch (Throwable ignored) {
-		}
-		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + name + ".json");
-			if (!f.exists()) {
-				f.getParentFile().mkdirs();
-				f.createNewFile();
+			{
+				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + name + ".json");
+				if (!f.exists()) {
+					f.getParentFile().mkdirs();
+					f.createNewFile();
+				}
+				FileWriter writer = new FileWriter(f);
+				writer.write(blockItem.replace("%name%", name));
+				writer.close();
 			}
-			FileWriter writer = new FileWriter(f);
-			writer.write(blockItem.replace("%name%", name));
-			writer.close();
-		} catch (Throwable ignored) {
-		}
-		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\blockstates\\" + name + ".json");
-			if (!f.exists()) {
-				f.getParentFile().mkdirs();
-				f.createNewFile();
+			{
+				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\blockstates\\" + name + ".json");
+				if (!f.exists()) {
+					f.getParentFile().mkdirs();
+					f.createNewFile();
+				}
+				FileWriter writer = new FileWriter(f);
+				writer.write(logState.replace("%name%", name));
+				writer.close();
 			}
-			FileWriter writer = new FileWriter(f);
-			writer.write(logState.replace("%name%", name));
-			writer.close();
+			if (!name.startsWith("stripped_")) {
+				{
+					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\recipes\\" + name.replace("log", "planks") + ".json");
+					if (!f.exists()) {
+						f.getParentFile().mkdirs();
+						f.createNewFile();
+					}
+					FileWriter writer = new FileWriter(f);
+					writer.write(planks.replace("%name%", name).replace("log%", ""));
+					writer.close();
+				}
+				{
+					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\recipes\\" + name.replace("log", "door") + ".json");
+					if (!f.exists()) {
+						f.getParentFile().mkdirs();
+						f.createNewFile();
+					}
+					FileWriter writer = new FileWriter(f);
+					writer.write(door.replace("%name%", name).replace("log%", ""));
+					writer.close();
+				}
+				{
+					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\recipes\\" + name.replace("log", "trapdoor") + ".json");
+					if (!f.exists()) {
+						f.getParentFile().mkdirs();
+						f.createNewFile();
+					}
+					FileWriter writer = new FileWriter(f);
+					writer.write(trapdoor.replace("%name%", name).replace("log%", ""));
+					writer.close();
+				}
+			}
 		} catch (Throwable ignored) {
 		}
 	}
@@ -289,4 +379,19 @@ public class Datagen {
 		}
 		lang.append("\",");
 	}
+
+	private static final String planks = "{\"type\":\"minecraft:crafting_shapeless\",\"group\":\"planks\",\"ingredients\":[{" +
+			"\"tag\":\"spooky_autumn_forests:%name%\"}],\"result\":{" +
+			"\"item\":\"spooky_autumn_forests:%name%%planks\"," +
+			"\"count\":4}}";
+	
+	private static final String door = "{\"type\":\"minecraft:crafting_shaped\",\"group\":\"wooden_door\"," +
+			"\"pattern\":[\"##\",\"##\",\"##\"],\"key\":{\"#\":{" +
+			"\"item\":\"spooky_autumn_forests:%name%%planks\"}}," +
+			"\"result\":{\"item\":\"spooky_autumn_forests:%name%%door\",\"count\":3}}";
+	
+	private static final String trapdoor = "{\"type\":\"minecraft:crafting_shaped\",\"group\":\"wooden_door\"," +
+			"\"pattern\":[\"###\",\"###\"],\"key\":{\"#\":{" +
+			"\"item\":\"spooky_autumn_forests:%name%%planks\"}}," +
+			"\"result\":{\"item\":\"spooky_autumn_forests:%name%%trapdoor\",\"count\":2}}";
 }

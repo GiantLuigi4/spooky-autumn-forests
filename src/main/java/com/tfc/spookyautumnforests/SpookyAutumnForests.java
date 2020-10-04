@@ -47,7 +47,7 @@ public class SpookyAutumnForests {
 		
 		@SubscribeEvent
 		public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-			for (String[] sa : Blocks.regularBlocks) {
+			for (String[] sa : Registries.regularBlocks) {
 				try {
 					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
 					get.setAccessible(true);
@@ -59,7 +59,7 @@ public class SpookyAutumnForests {
 					err.printStackTrace();
 				}
 			}
-			for (String[] sa : Blocks.logs) {
+			for (String[] sa : Registries.logs) {
 				try {
 					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
 					get.setAccessible(true);
@@ -93,7 +93,7 @@ public class SpookyAutumnForests {
 					err.printStackTrace();
 				}
 			}
-			for (String[] sa : Blocks.doors) {
+			for (String[] sa : Registries.doors) {
 				try {
 					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
 					get.setAccessible(true);
@@ -105,7 +105,7 @@ public class SpookyAutumnForests {
 					err.printStackTrace();
 				}
 			}
-			for (String[] sa : Blocks.trapdoors) {
+			for (String[] sa : Registries.trapdoors) {
 				try {
 					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
 					get.setAccessible(true);
@@ -117,30 +117,42 @@ public class SpookyAutumnForests {
 					err.printStackTrace();
 				}
 			}
+			{
+				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING),false).setRegistryName("spooky_autumn_forests", "spooky_wood_copper_sapling");
+				blockRegistryEvent.getRegistry().register(block);
+				blocks.put("spooky_wood_copper_sapling", block);
+			}
+			{
+				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING),false).setRegistryName("spooky_autumn_forests", "spooky_wood_sapling");
+				blockRegistryEvent.getRegistry().register(block);
+				blocks.put("spooky_wood_sapling", block);
+			}
 		}
 		
 		@SubscribeEvent
 		public static void onItemsRegistry(final RegistryEvent.Register<Item> itemRegistryEvent) {
-			for (String[] sa : Blocks.regularBlocks) {
+			for (String[] sa : Registries.regularBlocks) {
 				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.BUILDING_BLOCKS));
 				item.setRegistryName("spooky_autumn_forests", sa[0]);
 				itemRegistryEvent.getRegistry().register(item);
 			}
-			for (String[] sa : Blocks.logs) {
+			for (String[] sa : Registries.logs) {
 				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.BUILDING_BLOCKS));
 				item.setRegistryName("spooky_autumn_forests", sa[0]);
 				itemRegistryEvent.getRegistry().register(item);
 			}
-			for (String[] sa : Blocks.trapdoors) {
+			for (String[] sa : Registries.trapdoors) {
 				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.REDSTONE));
 				item.setRegistryName("spooky_autumn_forests", sa[0]);
 				itemRegistryEvent.getRegistry().register(item);
 			}
-			for (String[] sa : Blocks.doors) {
+			for (String[] sa : Registries.doors) {
 				Item item = new TallBlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.REDSTONE));
 				item.setRegistryName("spooky_autumn_forests", sa[0]);
 				itemRegistryEvent.getRegistry().register(item);
 			}
+			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_copper_sapling"),new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests","spooky_wood_copper_sapling"));
+			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_sapling"),new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests","spooky_wood_sapling"));
 		}
 	}
 }

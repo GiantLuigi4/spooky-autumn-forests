@@ -1,6 +1,6 @@
 package com.tfc.spookyautumnforests;
 
-public class Blocks {
+public class Registries {
 	public static final String[][] regularBlocks = new String[][]{
 			{"spooky_wood_planks", "OAK_PLANKS"},
 			{"spooky_leaves_copper", "OAK_LEAVES"}
@@ -27,5 +27,9 @@ public class Blocks {
 	
 	public static final String[][] trapdoors = new String[][]{
 			{"spooky_wood_trapdoor", "OAK_TRAPDOOR"},
+	};
+	
+	public static final String[] items = new String[]{
+			"spooky_wood_sapling",
 	};
 }
