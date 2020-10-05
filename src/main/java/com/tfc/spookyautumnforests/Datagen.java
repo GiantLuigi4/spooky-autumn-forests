@@ -216,7 +216,8 @@ public class Datagen {
 			allBlocks.add(sa[0]);
 		}
 		for (String[] sa : Registries.leaves) {
-			genLeaves(sa[0]);
+			if (!sa[0].equals("spooky_leaves_copper")) genLeaves(sa[0]);
+			else genBlock(sa[0]);
 			addLangEntry(sa[0], lang);
 			allBlocks.add(sa[0]);
 		}

@@ -3,15 +3,31 @@ package com.tfc.spookyautumnforests;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.IGrowable;
+import net.minecraft.pathfinding.PathType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.PlantType;
 
 import java.util.Random;
 
-public class SaplingBlock extends Block {
+public class SaplingBlock extends Block implements net.minecraftforge.common.IPlantable, IGrowable {
 	private final boolean isCopper;
 	private final boolean instant;
+	
+	@Override
+	public BlockState getPlant(IBlockReader world, BlockPos pos) {
+		return this.getDefaultState();
+	}
+	
+	@Override
+	public PlantType getPlantType(IBlockReader world, BlockPos pos) {
+		return PlantType.PLAINS;
+	}
 	
 	public SaplingBlock(Properties properties, boolean isCopper) {
 		super(properties);
@@ -32,11 +48,23 @@ public class SaplingBlock extends Block {
 	
 	@Override
 	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
-		if (instant) {
-			if (worldIn instanceof ServerWorld) {
-				randomTick(state, (ServerWorld) worldIn, pos, worldIn.rand);
-			}
-		}
+		if (instant && worldIn instanceof ServerWorld)
+			randomTick(state, (ServerWorld) worldIn, pos, worldIn.rand);
+	}
+	
+	public boolean isValidPosition(BlockState state, IWorldReader worldIn, BlockPos pos) {
+		BlockPos blockpos = pos.down();
+		if (state.getBlock() == this) //Forge: This function is called during world gen and placement, before this block is set, so if we are not 'here' then assume it's the pre-check.
+			return worldIn.getBlockState(blockpos).canSustainPlant(worldIn, blockpos, Direction.UP, this);
+		return this.isValidGround(worldIn.getBlockState(blockpos), worldIn, blockpos);
+	}
+	
+	protected boolean isValidGround(BlockState state, IBlockReader worldIn, BlockPos pos) {
+		return state.isIn(Blocks.GRASS_BLOCK) || state.isIn(Blocks.DIRT) || state.isIn(Blocks.COARSE_DIRT) || state.isIn(Blocks.PODZOL) || state.isIn(Blocks.FARMLAND);
+	}
+	
+	public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+		return true;
 	}
 	
 	@Override
@@ -113,9 +141,9 @@ public class SaplingBlock extends Block {
 	public void setLeaves(World worldIn, BlockPos pos, int offX, int offY, int offZ) {
 		BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + offY, pos.getZ() + offZ);
 		if (worldIn.getBlockState(pos1).canBeReplacedByLeaves(worldIn, pos1)) {
-//			boolean placeCopper = isCopper || worldIn.getRandom().nextDouble() > 0.8;
+			boolean placeCopper = isCopper || worldIn.getRandom().nextDouble() > 0.8;
 			worldIn.setBlockState(pos1,
-					SpookyAutumnForests.RegistryEvents.blocks.get(isCopper ? "spooky_leaves_copper" : "spooky_wood_leaves").getDefaultState()
+					SpookyAutumnForests.RegistryEvents.blocks.get(placeCopper ? "spooky_leaves_copper" : "spooky_wood_leaves").getDefaultState()
 			);
 		}
 	}
@@ -127,5 +155,23 @@ public class SaplingBlock extends Block {
 					SpookyAutumnForests.RegistryEvents.blocks.get("spooky_wood_log").getDefaultState()
 			);
 		}
+	}
+	
+	@Override
+	public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
+		if (this.instant && world instanceof ServerWorld)
+			this.randomTick(state, (ServerWorld) world, pos, ((ServerWorld) world).getRandom());
+	}
+	
+	public boolean canGrow(IBlockReader worldIn, BlockPos pos, BlockState state, boolean isClient) {
+		return true;
+	}
+	
+	public boolean canUseBonemeal(World worldIn, Random rand, BlockPos pos, BlockState state) {
+		return (double) worldIn.rand.nextFloat() < 0.25D;
+	}
+	
+	public void grow(ServerWorld worldIn, Random rand, BlockPos pos, BlockState state) {
+		this.randomTick(state, worldIn, pos, rand);
 	}
 }

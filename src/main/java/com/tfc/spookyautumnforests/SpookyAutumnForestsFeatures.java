@@ -17,8 +17,9 @@ public class SpookyAutumnForestsFeatures {
 			new BlockWithContextConfig(
 					SpookyAutumnForests.RegistryEvents.blocks.get("spooky_forests_tree").getDefaultState(),
 					ImmutableList.of(Blocks.GRASS_BLOCK.getDefaultState()),
-					ImmutableList.of(),
-					ImmutableList.of())
+					ImmutableList.of(Blocks.AIR.getDefaultState()),
+					ImmutableList.of(Blocks.AIR.getDefaultState())
+			)
 	).withPlacement(net.minecraft.world.gen.feature.Features.Placements.HEIGHTMAP_PLACEMENT).withPlacement(Placement.field_242902_f.configure(new AtSurfaceWithExtraConfig(16, 1, 8))));
 	
 	private static <FC extends IFeatureConfig, F extends Feature<FC>> ConfiguredFeature<FC, F> newConfiguredFeature(String registryName, ConfiguredFeature<FC, F> configuredFeature) {

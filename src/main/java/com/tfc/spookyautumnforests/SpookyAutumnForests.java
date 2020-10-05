@@ -212,7 +212,7 @@ public class SpookyAutumnForests {
 									.build()
 					)
 					.build()
-					.setRegistryName("spooky_autumn_forests", "spooky_wood_forest_2");
+					.setRegistryName("spooky_autumn_forests", "nightmare_forest");
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
 			BiomeManager.addBiome(
 					BiomeManager.BiomeType.WARM,
@@ -220,8 +220,8 @@ public class SpookyAutumnForests {
 							RegistryKey.getOrCreateKey(
 									Registry.BIOME_KEY,
 									new ResourceLocation(
-											"spooky_autumn_forests", "spooky_wood_forest_2"
-									)), 23812038));
+											"spooky_autumn_forests", "nightmare_forest"
+									)), 10));
 		}
 		
 		@SubscribeEvent
