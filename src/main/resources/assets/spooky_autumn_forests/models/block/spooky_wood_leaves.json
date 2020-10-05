@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "spooky_autumn_forests:block/spooky_wood_leaves"
+  }
+}

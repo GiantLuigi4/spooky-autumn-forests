@@ -1,20 +1,30 @@
 package com.tfc.spookyautumnforests;
 
 import net.minecraft.block.*;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.TallBlockItem;
 import net.minecraft.state.Property;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.*;
+import net.minecraft.world.gen.GenerationStage;
+import net.minecraft.world.gen.feature.BlockStateFeatureConfig;
+import net.minecraft.world.gen.feature.LakesFeature;
+import net.minecraft.world.gen.surfacebuilders.DefaultSurfaceBuilder;
+import net.minecraft.world.gen.surfacebuilders.SurfaceBuilder;
+import net.minecraftforge.common.BiomeManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ToolType;
+import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
+import net.minecraftforge.common.world.MobSpawnInfoBuilder;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -35,6 +45,7 @@ public class SpookyAutumnForests {
 		
 		bus.register(RegistryEvents.class);
 		bus.addListener(this::clientSetup);
+		MinecraftForge.EVENT_BUS.addListener(Client::onTick);
 	}
 	
 	public void clientSetup(FMLClientSetupEvent event) {
@@ -44,6 +55,8 @@ public class SpookyAutumnForests {
 	@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 	public static class RegistryEvents {
 		public static final HashMap<String, Block> blocks = new HashMap<>();
+		
+		public static Biome spooky_forest_2;
 		
 		@SubscribeEvent
 		public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
@@ -117,16 +130,84 @@ public class SpookyAutumnForests {
 					err.printStackTrace();
 				}
 			}
+			for (String[] sa : Registries.leaves) {
+				try {
+					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+					get.setAccessible(true);
+					Block block = new LeavesBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+					block.setRegistryName("spooky_autumn_forests", sa[0]);
+					blockRegistryEvent.getRegistry().register(block);
+					blocks.put(sa[0], block);
+				} catch (Throwable err) {
+					err.printStackTrace();
+				}
+			}
 			{
-				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING),false).setRegistryName("spooky_autumn_forests", "spooky_wood_copper_sapling");
+				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING), true).setRegistryName("spooky_autumn_forests", "spooky_wood_copper_sapling");
 				blockRegistryEvent.getRegistry().register(block);
 				blocks.put("spooky_wood_copper_sapling", block);
 			}
 			{
-				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING),false).setRegistryName("spooky_autumn_forests", "spooky_wood_sapling");
+				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING), false).setRegistryName("spooky_autumn_forests", "spooky_wood_sapling");
 				blockRegistryEvent.getRegistry().register(block);
 				blocks.put("spooky_wood_sapling", block);
 			}
+		}
+		
+		@SubscribeEvent
+		public static void onBiomeRegistry(final RegistryEvent.Register<Biome> biomeRegistryEvent) {
+			int r = 128;
+			int color = ((0xFF) << 24) |
+					((r & 0xFF) << 16) |
+					(((r / 2) & 0xFF) << 8) |
+					((0 & 0xFF));
+			int color2 = ((0xFF) << 24) |
+					((r & 0xFF) << 16) |
+					(((r / 2) & 0xFF) << 8) |
+					((r & 0xFF));
+			spooky_forest_2 = new Biome.Builder()
+					.scale(1)
+					.temperature(8)
+					.category(Biome.Category.FOREST)
+					.depth(1)
+					.precipitation(Biome.RainType.RAIN)
+					.withMobSpawnSettings(
+							new MobSpawnInfoBuilder(MobSpawnInfo.EMPTY)
+									.withCreatureSpawnProbability(0.9f)
+									.withSpawner(EntityClassification.MONSTER, new MobSpawnInfo.Spawners(EntityType.ZOMBIE, 50, 10, 20))
+									.withSpawner(EntityClassification.MONSTER, new MobSpawnInfo.Spawners(EntityType.SKELETON, 50, 10, 20))
+									.withSpawner(EntityClassification.MONSTER, new MobSpawnInfo.Spawners(EntityType.SPIDER, 50, 10, 20))
+									.withSpawner(EntityClassification.MONSTER, new MobSpawnInfo.Spawners(EntityType.CREEPER, 50, 10, 20))
+									.withSpawner(EntityClassification.MONSTER, new MobSpawnInfo.Spawners(EntityType.ENDERMAN, 50, 10, 20))
+									.copy()
+					).setEffects(
+							new BiomeAmbience.Builder()
+									.setFogColor(12638463)
+									.withFoliageColor(color)
+									.setWaterColor(color2)
+									.setWaterFogColor(color2)
+									.withSkyColor(0)
+									.setMoodSound(MoodSoundAmbience.DEFAULT_CAVE)
+									.build()
+					)
+					.downfall(0.25f)
+					.withGenerationSettings(
+							new BiomeGenerationSettingsBuilder(BiomeGenerationSettings.DEFAULT_SETTINGS)
+									.withFeature(GenerationStage.Decoration.LAKES, LakesFeature.LAKE.withConfiguration(new BlockStateFeatureConfig(Blocks.GRASS.getDefaultState())))
+									.withSurfaceBuilder(DefaultSurfaceBuilder.DEFAULT.func_242929_a(SurfaceBuilder.GRASS_DIRT_GRAVEL_CONFIG))
+									.build()
+					)
+					.build()
+					.setRegistryName("spooky_autumn_forests", "spooky_wood_forest_2");
+			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
+			BiomeManager.addBiome(
+					BiomeManager.BiomeType.WARM,
+					new BiomeManager.BiomeEntry(
+							RegistryKey.getOrCreateKey(
+									Registry.BIOME_KEY,
+									new ResourceLocation(
+											"spooky_autumn_forests", "spooky_wood_forest_2"
+									)), 11000));
 		}
 		
 		@SubscribeEvent
@@ -151,8 +232,13 @@ public class SpookyAutumnForests {
 				item.setRegistryName("spooky_autumn_forests", sa[0]);
 				itemRegistryEvent.getRegistry().register(item);
 			}
-			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_copper_sapling"),new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests","spooky_wood_copper_sapling"));
-			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_sapling"),new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests","spooky_wood_sapling"));
+			for (String[] sa : Registries.leaves) {
+				Item item = new BlockItem(blocks.get(sa[0]), new Item.Properties().group(ItemGroup.REDSTONE));
+				item.setRegistryName("spooky_autumn_forests", sa[0]);
+				itemRegistryEvent.getRegistry().register(item);
+			}
+			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_copper_sapling"), new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests", "spooky_wood_copper_sapling"));
+			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_sapling"), new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests", "spooky_wood_sapling"));
 		}
 	}
 }

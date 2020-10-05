@@ -95,8 +95,9 @@ public class SaplingBlock extends Block {
 	public void setLeaves(World worldIn, BlockPos pos, int offX, int offY, int offZ) {
 		BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + offY, pos.getZ() + offZ);
 		if (worldIn.getBlockState(pos1).canBeReplacedByLeaves(worldIn, pos1)) {
+//			boolean placeCopper = isCopper || worldIn.getRandom().nextDouble() > 0.8;
 			worldIn.setBlockState(pos1,
-					SpookyAutumnForests.RegistryEvents.blocks.get(isCopper?"spooky_leaves_copper":"spooky_leaves").getDefaultState()
+					SpookyAutumnForests.RegistryEvents.blocks.get(isCopper ? "spooky_leaves_copper" : "spooky_wood_leaves").getDefaultState()
 			);
 		}
 	}

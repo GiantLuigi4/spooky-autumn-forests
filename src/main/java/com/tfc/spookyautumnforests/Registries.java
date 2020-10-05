@@ -31,5 +31,6 @@ public class Registries {
 	
 	public static final String[] items = new String[]{
 			"spooky_wood_sapling",
+			"spooky_wood_copper_sapling"
 	};
 }

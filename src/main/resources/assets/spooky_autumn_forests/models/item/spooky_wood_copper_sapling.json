@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "spooky_autumn_forests:block/spooky_wood_copper_sapling"
+  }
+}
