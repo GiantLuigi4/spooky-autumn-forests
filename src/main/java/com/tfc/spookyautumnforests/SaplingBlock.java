@@ -11,14 +11,32 @@ import java.util.Random;
 
 public class SaplingBlock extends Block {
 	private final boolean isCopper;
+	private final boolean instant;
+	
 	public SaplingBlock(Properties properties, boolean isCopper) {
 		super(properties);
 		this.isCopper = isCopper;
+		this.instant = false;
+	}
+	
+	public SaplingBlock(Properties properties, boolean isCopper, boolean instant) {
+		super(properties);
+		this.isCopper = isCopper;
+		this.instant = instant;
 	}
 	
 	@Override
 	public boolean ticksRandomly(BlockState state) {
 		return true;
+	}
+	
+	@Override
+	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
+		if (instant) {
+			if (worldIn instanceof ServerWorld) {
+				randomTick(state, (ServerWorld) worldIn, pos, worldIn.rand);
+			}
+		}
 	}
 	
 	@Override

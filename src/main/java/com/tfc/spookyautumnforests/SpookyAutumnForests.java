@@ -16,8 +16,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.*;
 import net.minecraft.world.gen.GenerationStage;
-import net.minecraft.world.gen.feature.BlockStateFeatureConfig;
-import net.minecraft.world.gen.feature.LakesFeature;
+import net.minecraft.world.gen.carver.WorldCarver;
+import net.minecraft.world.gen.feature.ProbabilityConfig;
 import net.minecraft.world.gen.surfacebuilders.DefaultSurfaceBuilder;
 import net.minecraft.world.gen.surfacebuilders.SurfaceBuilder;
 import net.minecraftforge.common.BiomeManager;
@@ -36,6 +36,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static net.minecraft.world.gen.feature.Features.*;
 
 @Mod("spooky_autumn_forests")
 public class SpookyAutumnForests {
@@ -152,6 +154,11 @@ public class SpookyAutumnForests {
 				blockRegistryEvent.getRegistry().register(block);
 				blocks.put("spooky_wood_sapling", block);
 			}
+			{
+				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING), false, true).setRegistryName("spooky_autumn_forests", "spooky_forests_tree");
+				blockRegistryEvent.getRegistry().register(block);
+				blocks.put("spooky_forests_tree", block);
+			}
 		}
 		
 		@SubscribeEvent
@@ -166,10 +173,10 @@ public class SpookyAutumnForests {
 					(((r / 2) & 0xFF) << 8) |
 					((r & 0xFF));
 			spooky_forest_2 = new Biome.Builder()
-					.scale(1)
+					.scale(0.1f)
 					.temperature(8)
 					.category(Biome.Category.FOREST)
-					.depth(1)
+					.depth(0.2f)
 					.precipitation(Biome.RainType.RAIN)
 					.withMobSpawnSettings(
 							new MobSpawnInfoBuilder(MobSpawnInfo.EMPTY)
@@ -193,7 +200,14 @@ public class SpookyAutumnForests {
 					.downfall(0.25f)
 					.withGenerationSettings(
 							new BiomeGenerationSettingsBuilder(BiomeGenerationSettings.DEFAULT_SETTINGS)
-									.withFeature(GenerationStage.Decoration.LAKES, LakesFeature.LAKE.withConfiguration(new BlockStateFeatureConfig(Blocks.GRASS.getDefaultState())))
+									.withFeature(GenerationStage.Decoration.UNDERGROUND_ORES, ORE_GOLD)
+									.withFeature(GenerationStage.Decoration.UNDERGROUND_ORES, ORE_IRON)
+									.withFeature(GenerationStage.Decoration.UNDERGROUND_ORES, ORE_COAL)
+									.withFeature(GenerationStage.Decoration.UNDERGROUND_ORES, ORE_DIAMOND)
+									.withFeature(GenerationStage.Decoration.LAKES, LAKE_WATER)
+									.withFeature(GenerationStage.Decoration.VEGETAL_DECORATION, SpookyAutumnForestsFeatures.TREE)
+									.withCarver(GenerationStage.Carving.AIR, WorldCarver.CAVE.func_242761_a(new ProbabilityConfig(0.5f)))
+									.withCarver(GenerationStage.Carving.AIR, WorldCarver.CANYON.func_242761_a(new ProbabilityConfig(0.5f)))
 									.withSurfaceBuilder(DefaultSurfaceBuilder.DEFAULT.func_242929_a(SurfaceBuilder.GRASS_DIRT_GRAVEL_CONFIG))
 									.build()
 					)
@@ -207,7 +221,7 @@ public class SpookyAutumnForests {
 									Registry.BIOME_KEY,
 									new ResourceLocation(
 											"spooky_autumn_forests", "spooky_wood_forest_2"
-									)), 11000));
+									)), 23812038));
 		}
 		
 		@SubscribeEvent
