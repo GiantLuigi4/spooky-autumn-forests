@@ -35,9 +35,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -126,9 +126,10 @@ public class SpookyAutumnForests {
 		public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
 			for (String[] sa : Registries.regularBlocks) {
 				try {
-					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
-					get.setAccessible(true);
-					Block block = new Block(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+//					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+//					get.setAccessible(true);
+//					Block block = new Block(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+					Block block = new Block(AbstractBlock.Properties.from(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(sa[1].toLowerCase()))));
 					block.setRegistryName("spooky_autumn_forests", sa[0]);
 					blockRegistryEvent.getRegistry().register(block);
 					blocks.put(sa[0], block);
@@ -138,20 +139,22 @@ public class SpookyAutumnForests {
 			}
 			for (String[] sa : Registries.logs) {
 				try {
-					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
-					get.setAccessible(true);
-					Block block = new RotatedPillarBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null))) {
+//					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+//					get.setAccessible(true);
+//					Block block = new RotatedPillarBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null))) {
+					Block block = new RotatedPillarBlock(AbstractBlock.Properties.from(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(sa[1].toLowerCase())))) {
 						@Override
 						public @NotNull ActionResultType onBlockActivated(@NotNull BlockState state, @NotNull World worldIn, @NotNull BlockPos pos, @NotNull PlayerEntity player, @NotNull Hand handIn, @NotNull BlockRayTraceResult hit) {
-							if (blocks.containsKey("stripped_"+sa[0])) {
+							if (blocks.containsKey("stripped_" + sa[0])) {
 								if (player.getHeldItem(handIn).getToolTypes().contains(ToolType.AXE)) {
-									AtomicReference<BlockState> state1 = new AtomicReference<>(blocks.get("stripped_"+sa[0]).getDefaultState());
+									AtomicReference<BlockState> state1 = new AtomicReference<>(blocks.get("stripped_" + sa[0]).getDefaultState());
 									state.getProperties().forEach(property -> {
 										state1.set(applyProperty(state, state1.get(), property));
 									});
 									worldIn.setBlockState(pos, state1.get());
 									worldIn.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1, 1, false);
-									if (!player.isCreative()) player.getHeldItem(handIn).damageItem(1, player, (p_220040_1_) -> p_220040_1_.sendBreakAnimation(handIn));
+									if (!player.isCreative())
+										player.getHeldItem(handIn).damageItem(1, player, (p_220040_1_) -> p_220040_1_.sendBreakAnimation(handIn));
 									player.swingArm(handIn);
 									return ActionResultType.PASS;
 								}
@@ -172,9 +175,10 @@ public class SpookyAutumnForests {
 			}
 			for (String[] sa : Registries.doors) {
 				try {
-					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
-					get.setAccessible(true);
-					Block block = new DoorBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+//					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+//					get.setAccessible(true);
+//					Block block = new DoorBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+					Block block = new DoorBlock(AbstractBlock.Properties.from(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(sa[1].toLowerCase()))));
 					block.setRegistryName("spooky_autumn_forests", sa[0]);
 					blockRegistryEvent.getRegistry().register(block);
 					blocks.put(sa[0], block);
@@ -184,9 +188,10 @@ public class SpookyAutumnForests {
 			}
 			for (String[] sa : Registries.trapdoors) {
 				try {
-					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
-					get.setAccessible(true);
-					Block block = new TrapDoorBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+//					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+//					get.setAccessible(true);
+//					Block block = new TrapDoorBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+					Block block = new TrapDoorBlock(AbstractBlock.Properties.from(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(sa[1].toLowerCase()))));
 					block.setRegistryName("spooky_autumn_forests", sa[0]);
 					blockRegistryEvent.getRegistry().register(block);
 					blocks.put(sa[0], block);
@@ -196,9 +201,10 @@ public class SpookyAutumnForests {
 			}
 			for (String[] sa : Registries.leaves) {
 				try {
-					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
-					get.setAccessible(true);
-					Block block = new LeavesBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+//					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
+//					get.setAccessible(true);
+//					Block block = new LeavesBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
+					Block block = new LeavesBlock(AbstractBlock.Properties.from(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(sa[1].toLowerCase()))));
 					block.setRegistryName("spooky_autumn_forests", sa[0]);
 					blockRegistryEvent.getRegistry().register(block);
 					blocks.put(sa[0], block);
@@ -288,6 +294,14 @@ public class SpookyAutumnForests {
 					.build()
 					.setRegistryName("spooky_autumn_forests", "nightmare_forest");
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
+			BiomeManager.addBiome(
+					BiomeManager.BiomeType.WARM,
+					new BiomeManager.BiomeEntry(
+							RegistryKey.getOrCreateKey(
+									Registry.BIOME_KEY,
+									new ResourceLocation(
+											"spooky_autumn_forests", "nightmare_forest"
+									)), 1));
 			r = 200;
 			color = ((0xFF) << 24) |
 					((r & 0xFF) << 16) |
@@ -318,7 +332,7 @@ public class SpookyAutumnForests {
 									.withFoliageColor(color)
 									.setWaterColor(color2)
 									.setWaterFogColor(color2)
-									.withSkyColor(12638463)
+									.withSkyColor(8431103)
 									.withGrassColor(color)
 									.setMoodSound(MoodSoundAmbience.DEFAULT_CAVE)
 									.build()
@@ -347,7 +361,7 @@ public class SpookyAutumnForests {
 									Registry.BIOME_KEY,
 									new ResourceLocation(
 											"spooky_autumn_forests", "spooky_forest"
-									)), 128));
+									)), 4));
 			r = 140;
 			color = ((0xFF) << 24) |
 					((r & 0xFF) << 16) |
@@ -378,7 +392,7 @@ public class SpookyAutumnForests {
 									.withFoliageColor(color)
 									.setWaterColor(color2)
 									.setWaterFogColor(color2)
-									.withSkyColor(12638463)
+									.withSkyColor(8431103)
 									.setMoodSound(MoodSoundAmbience.DEFAULT_CAVE)
 									.build()
 					)
@@ -406,7 +420,7 @@ public class SpookyAutumnForests {
 									Registry.BIOME_KEY,
 									new ResourceLocation(
 											"spooky_autumn_forests", "autumn_forest"
-									)), 256));
+									)), 8));
 		}
 		
 		@SubscribeEvent
