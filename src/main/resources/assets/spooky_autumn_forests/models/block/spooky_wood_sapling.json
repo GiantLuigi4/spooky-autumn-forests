@@ -1,0 +1,6 @@
+{
+    "parent": "block/cross",
+    "textures": {
+        "cross": "spooky_autumn_forests:block/spooky_wood_sapling"
+    }
+}

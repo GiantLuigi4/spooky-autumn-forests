@@ -245,6 +245,18 @@ public class Datagen {
 			addLangEntry(sa[0], lang);
 			allBlocks.add(sa[0]);
 		}
+		for (String s : Registries.items) {
+			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + s + ".json");
+			if (!f.exists()) {
+				f.getParentFile().mkdirs();
+				f.createNewFile();
+			}
+			System.out.println(s);
+			addLangEntry(s, lang);
+			FileWriter writer = new FileWriter(f);
+			writer.write(normalItem.replace("%name%", s).replace("item/", "block/").replace("block/g", "item/g"));
+			writer.close();
+		}
 		lang.append("§}");
 		{
 			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\lang\\en_us.json");
@@ -255,16 +267,6 @@ public class Datagen {
 			FileOutputStream stream = new FileOutputStream(f);
 			stream.write(lang.toString().replace(",§", "").getBytes());
 			stream.close();
-		}
-		for (String s : Registries.items) {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + s + ".json");
-			if (!f.exists()) {
-				f.getParentFile().mkdirs();
-				f.createNewFile();
-			}
-			FileWriter writer = new FileWriter(f);
-			writer.write(normalItem.replace("%name%", s).replace("item/", "block/").replace("block/g", "item/g"));
-			writer.close();
 		}
 		StringBuilder logsThatBurn = new StringBuilder(
 				"{" +
