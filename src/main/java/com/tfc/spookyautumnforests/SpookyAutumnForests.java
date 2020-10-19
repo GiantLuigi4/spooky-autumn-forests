@@ -235,7 +235,7 @@ public class SpookyAutumnForests {
 			int color = ((0xFF) << 24) |
 					((r & 0xFF) << 16) |
 					(((r / 2) & 0xFF) << 8) |
-					((0 & 0xFF));
+					(((r / 7) & 0xFF));
 			int color2 = ((0xFF) << 24) |
 					((r & 0xFF) << 16) |
 					(((r / 2) & 0xFF) << 8) |
@@ -274,6 +274,7 @@ public class SpookyAutumnForests {
 									.setWaterColor(color2)
 									.setWaterFogColor(color2)
 									.withSkyColor(0)
+									.withGrassColor(color)
 									.setMoodSound(MoodSoundAmbience.DEFAULT_CAVE)
 									.build()
 					)
@@ -367,6 +368,10 @@ public class SpookyAutumnForests {
 					((r & 0xFF) << 16) |
 					(((r / 2) & 0xFF) << 8) |
 					((0 & 0xFF));
+			int color3 = ((0xFF) << 24) |
+					((255 & 0xFF) << 16) |
+					(((255 / 2) & 0xFF) << 8) |
+					((0 & 0xFF));
 			spooky_forest_2 = new Biome.Builder()
 					.scale(0.1f)
 					.temperature(8)
@@ -393,6 +398,7 @@ public class SpookyAutumnForests {
 									.setWaterColor(color2)
 									.setWaterFogColor(color2)
 									.withSkyColor(8431103)
+									.withGrassColor(color3)
 									.setMoodSound(MoodSoundAmbience.DEFAULT_CAVE)
 									.build()
 					)
