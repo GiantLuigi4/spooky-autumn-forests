@@ -48,6 +48,7 @@ public class SpookyAutumnForestsFeatures {
 	}
 	
 	private static <FC extends IFeatureConfig> Feature<FC> newFeature(String registryName, Feature<FC> configuredFeature) {
+		//thank you noeppi_noeppi
 		configuredFeature.setRegistryName(new ResourceLocation("spooky_autumn_forests", registryName));
 		ForgeRegistries.FEATURES.register(configuredFeature);
 		return configuredFeature;

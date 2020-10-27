@@ -32,10 +32,10 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,11 +51,10 @@ public class SpookyAutumnForests {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
 		bus.register(RegistryEvents.class);
-		DistExecutor.unsafeRunForDist(() -> () -> {
+		if (FMLEnvironment.dist.isClient()) {
 			bus.addListener(this::clientSetup);
 			MinecraftForge.EVENT_BUS.addListener(Client::onTick);
-			return null;
-		}, () -> () -> null);
+		}
 		MinecraftForge.EVENT_BUS.addListener(this::onEntitySpawn);
 	}
 	
@@ -66,6 +65,7 @@ public class SpookyAutumnForests {
 		Biome b = world.getBiome(t.getEntity().getPosition());
 		ResourceLocation regName = b.getRegistryName();
 		if (t.getEntityLiving() instanceof PlayerEntity) {
+			//thank you noeppi_noeppi
 			if (b.getAmbience().getSkyColor() == 0) {
 				if (world.getWorldInfo().getDayTime() % 1000 == 0) {
 					BlockPos pos = new BlockPos(t.getEntity().getPosition());
@@ -98,6 +98,7 @@ public class SpookyAutumnForests {
 						t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(RegistryEvents.getCopperLeaves()));
 					t.getEntityLiving().extinguish();
 				}
+			//thank you noeppi_noeppi
 			if (b.getAmbience().getSkyColor() == 0) {
 				if (t.getEntityLiving() instanceof SkeletonEntity)
 					t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
@@ -297,6 +298,7 @@ public class SpookyAutumnForests {
 									.build()
 					)
 					.build()
+					//thank you noeppi_noeppi
 					.setRegistryName(new ResourceLocation("spooky_autumn_forests", "nightmare_forest"));
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
 			BiomeManager.addBiome(
@@ -357,6 +359,7 @@ public class SpookyAutumnForests {
 									.build()
 					)
 					.build()
+					//thank you noeppi_noeppi
 					.setRegistryName(new ResourceLocation("spooky_autumn_forests", "spooky_forest"));
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
 			BiomeManager.addBiome(
@@ -421,6 +424,7 @@ public class SpookyAutumnForests {
 									.build()
 					)
 					.build()
+					//thank you noeppi_noeppi
 					.setRegistryName(new ResourceLocation("spooky_autumn_forests", "autumn_forest"));
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
 			BiomeManager.addBiome(
