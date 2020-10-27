@@ -18,7 +18,7 @@ public class Datagen {
 	private static void genLogBlock(String name) {
 		try {
 			{
-				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\block\\" + name + ".json");
+				File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/block/".replace('/', File.pathSeparatorChar) + name + ".json");
 				if (!f.exists()) {
 					f.getParentFile().mkdirs();
 					f.createNewFile();
@@ -28,7 +28,7 @@ public class Datagen {
 				writer.close();
 			}
 			{
-				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + name + ".json");
+				File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/item/".replace('/', File.pathSeparatorChar) + name + ".json");
 				if (!f.exists()) {
 					f.getParentFile().mkdirs();
 					f.createNewFile();
@@ -38,7 +38,7 @@ public class Datagen {
 				writer.close();
 			}
 			{
-				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\blockstates\\" + name + ".json");
+				File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/blockstates/".replace('/', File.pathSeparatorChar) + name + ".json");
 				if (!f.exists()) {
 					f.getParentFile().mkdirs();
 					f.createNewFile();
@@ -49,7 +49,7 @@ public class Datagen {
 			}
 			if (!name.startsWith("stripped_")) {
 				{
-					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\recipes\\" + name.replace("log", "planks") + ".json");
+					File f = new File(file + "/src/main/resources/data/spooky_autumn_forests/recipes/".replace('/', File.pathSeparatorChar) + name.replace("log", "planks") + ".json");
 					if (!f.exists()) {
 						f.getParentFile().mkdirs();
 						f.createNewFile();
@@ -59,7 +59,7 @@ public class Datagen {
 					writer.close();
 				}
 				{
-					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\recipes\\" + name.replace("log", "door") + ".json");
+					File f = new File(file + "/src/main/resources/data/spooky_autumn_forests/recipes/".replace('/', File.pathSeparatorChar) + name.replace("log", "door") + ".json");
 					if (!f.exists()) {
 						f.getParentFile().mkdirs();
 						f.createNewFile();
@@ -69,7 +69,7 @@ public class Datagen {
 					writer.close();
 				}
 				{
-					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\recipes\\" + name.replace("log", "trapdoor") + ".json");
+					File f = new File(file + "/src/main/resources/data/spooky_autumn_forests/recipes/".replace('/', File.pathSeparatorChar) + name.replace("log", "trapdoor") + ".json");
 					if (!f.exists()) {
 						f.getParentFile().mkdirs();
 						f.createNewFile();
@@ -92,7 +92,7 @@ public class Datagen {
 		};
 		for (String s : types) {
 			try {
-				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\block\\" + name + "_" + s + ".json");
+				File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/block/".replace('/', File.pathSeparatorChar) + name + "_" + s + ".json");
 				if (!f.exists()) {
 					f.getParentFile().mkdirs();
 					f.createNewFile();
@@ -104,7 +104,7 @@ public class Datagen {
 			}
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/item/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -115,7 +115,7 @@ public class Datagen {
 		} catch (Throwable ignored) {
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\blockstates\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/blockstates/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -135,7 +135,7 @@ public class Datagen {
 		};
 		for (String s : types) {
 			try {
-				File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\block\\" + name + "_" + s + ".json");
+				File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/block/".replace('/', File.pathSeparatorChar) + name + "_" + s + ".json");
 				if (!f.exists()) {
 					f.getParentFile().mkdirs();
 					f.createNewFile();
@@ -147,7 +147,7 @@ public class Datagen {
 			}
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/item/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -158,7 +158,7 @@ public class Datagen {
 		} catch (Throwable ignored) {
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\blockstates\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/blockstates/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -172,7 +172,7 @@ public class Datagen {
 	
 	private static void genBlock(String name) {
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\block\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/block/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -183,7 +183,7 @@ public class Datagen {
 		} catch (Throwable ignored) {
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/item/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -194,7 +194,7 @@ public class Datagen {
 		} catch (Throwable ignored) {
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\blockstates\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/blockstates/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -246,7 +246,7 @@ public class Datagen {
 			allBlocks.add(sa[0]);
 		}
 		for (String s : Registries.items) {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + s + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/item/".replace('/', File.pathSeparatorChar) + s + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -259,7 +259,7 @@ public class Datagen {
 		}
 		lang.append("§}");
 		{
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\lang\\en_us.json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/lang/en_us.json".replace('/', File.pathSeparatorChar));
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -277,7 +277,7 @@ public class Datagen {
 			tags.forEach((name, tag) -> {
 				try {
 					tag += ("§]}");
-					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\tags\\blocks\\" + name + ".json");
+					File f = new File(file + "/src/main/resources/data/spooky_autumn_forests/tags/blocks/".replace('/', File.pathSeparatorChar) + name + ".json");
 					if (!f.exists()) {
 						f.getParentFile().mkdirs();
 						f.createNewFile();
@@ -291,7 +291,7 @@ public class Datagen {
 				}
 				try {
 					tag += ("§]}");
-					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\tags\\items\\" + name + ".json");
+					File f = new File(file + "/src/main/resources/data/spooky_autumn_forests/tags/items/".replace('/', File.pathSeparatorChar) + name + ".json");
 					if (!f.exists()) {
 						f.getParentFile().mkdirs();
 						f.createNewFile();
@@ -306,7 +306,7 @@ public class Datagen {
 			});
 			try {
 				logsThatBurn.append("§]}");
-				File f = new File(file + "\\src\\main\\resources\\data\\minecraft\\tags\\blocks\\logs_that_burn.json");
+				File f = new File(file + "/src/main/resources/data/minecraft/tags/blocks/logs_that_burn.json".replace('/', File.pathSeparatorChar));
 				if (!f.exists()) {
 					f.getParentFile().mkdirs();
 					f.createNewFile();
@@ -407,7 +407,7 @@ public class Datagen {
 		if (!name.contains("leaves")) {
 			try {
 				{
-					File f = new File(file + "\\src\\main\\resources\\data\\spooky_autumn_forests\\loot_tables\\blocks\\" + name + ".json");
+					File f = new File(file + "/src/main/resources/data/spooky_autumn_forests/loot_tables/blocks/".replace('/', File.pathSeparatorChar) + name + ".json");
 					if (!f.exists()) {
 						f.getParentFile().mkdirs();
 						f.createNewFile();
@@ -438,7 +438,7 @@ public class Datagen {
 	
 	private static void genLeaves(String name) {
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\block\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/block/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -449,7 +449,7 @@ public class Datagen {
 		} catch (Throwable ignored) {
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\models\\item\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/models/item/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();
@@ -460,7 +460,7 @@ public class Datagen {
 		} catch (Throwable ignored) {
 		}
 		try {
-			File f = new File(file + "\\src\\main\\resources\\assets\\spooky_autumn_forests\\blockstates\\" + name + ".json");
+			File f = new File(file + "/src/main/resources/assets/spooky_autumn_forests/blockstates/".replace('/', File.pathSeparatorChar) + name + ".json");
 			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 				f.createNewFile();

@@ -14,6 +14,7 @@ import net.minecraft.world.gen.feature.IFeatureConfig;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
 import net.minecraft.world.gen.placement.AtSurfaceWithExtraConfig;
 import net.minecraft.world.gen.placement.Placement;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Random;
 
@@ -47,7 +48,8 @@ public class SpookyAutumnForestsFeatures {
 	}
 	
 	private static <FC extends IFeatureConfig> Feature<FC> newFeature(String registryName, Feature<FC> configuredFeature) {
-		Registry.register(Registry.FEATURE, new ResourceLocation("spooky_autumn_forests", registryName), configuredFeature);
+		configuredFeature.setRegistryName(new ResourceLocation("spooky_autumn_forests", registryName));
+		ForgeRegistries.FEATURES.register(configuredFeature);
 		return configuredFeature;
 	}
 }

@@ -9,6 +9,8 @@ public class Registries {
 			"spooky_leaves_copper",
 			"spooky_wood_door",
 			"spooky_wood_trapdoor",
+			"spooky_wood_sapling",
+			"spooky_wood_copper_sapling"
 	};
 	
 	public static final String[][] leaves = new String[][]{
