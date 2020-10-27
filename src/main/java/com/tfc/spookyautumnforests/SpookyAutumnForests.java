@@ -297,7 +297,7 @@ public class SpookyAutumnForests {
 									.build()
 					)
 					.build()
-					.setRegistryName("spooky_autumn_forests", "nightmare_forest");
+					.setRegistryName(new ResourceLocation("spooky_autumn_forests", "nightmare_forest"));
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
 			BiomeManager.addBiome(
 					BiomeManager.BiomeType.WARM,
@@ -357,7 +357,7 @@ public class SpookyAutumnForests {
 									.build()
 					)
 					.build()
-					.setRegistryName("spooky_autumn_forests", "spooky_forest");
+					.setRegistryName(new ResourceLocation("spooky_autumn_forests", "spooky_forest"));
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
 			BiomeManager.addBiome(
 					BiomeManager.BiomeType.WARM,
@@ -421,7 +421,7 @@ public class SpookyAutumnForests {
 									.build()
 					)
 					.build()
-					.setRegistryName("spooky_autumn_forests", "autumn_forest");
+					.setRegistryName(new ResourceLocation("spooky_autumn_forests", "autumn_forest"));
 			biomeRegistryEvent.getRegistry().register(spooky_forest_2);
 			BiomeManager.addBiome(
 					BiomeManager.BiomeType.WARM,
