@@ -32,6 +32,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -50,8 +51,11 @@ public class SpookyAutumnForests {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
 		bus.register(RegistryEvents.class);
-		bus.addListener(this::clientSetup);
-		MinecraftForge.EVENT_BUS.addListener(Client::onTick);
+		DistExecutor.unsafeRunForDist(() -> () -> {
+			bus.addListener(this::clientSetup);
+			MinecraftForge.EVENT_BUS.addListener(Client::onTick);
+			return null;
+		}, () -> () -> null);
 		MinecraftForge.EVENT_BUS.addListener(this::onEntitySpawn);
 	}
 	
@@ -62,7 +66,7 @@ public class SpookyAutumnForests {
 		Biome b = world.getBiome(t.getEntity().getPosition());
 		ResourceLocation regName = b.getRegistryName();
 		if (t.getEntityLiving() instanceof PlayerEntity) {
-			if (b.getSkyColor() == 0) {
+			if (b.getAmbience().getSkyColor() == 0) {
 				if (world.getWorldInfo().getDayTime() % 1000 == 0) {
 					BlockPos pos = new BlockPos(t.getEntity().getPosition());
 					pos = pos.add((world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1));
@@ -94,7 +98,7 @@ public class SpookyAutumnForests {
 						t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(RegistryEvents.getCopperLeaves()));
 					t.getEntityLiving().extinguish();
 				}
-			if (b.getSkyColor() == 0) {
+			if (b.getAmbience().getSkyColor() == 0) {
 				if (t.getEntityLiving() instanceof SkeletonEntity)
 					t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
 				else if (t.getEntityLiving() instanceof ZombieEntity)
