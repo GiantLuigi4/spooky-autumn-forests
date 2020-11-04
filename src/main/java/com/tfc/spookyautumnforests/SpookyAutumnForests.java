@@ -14,6 +14,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.*;
@@ -167,6 +168,11 @@ public class SpookyAutumnForests {
 							return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
 						}
 						
+						@Override
+						public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
+							return 5;
+						}
+						
 						public <A extends Comparable<A>> @NotNull BlockState applyProperty(@NotNull BlockState sourceState, @NotNull BlockState newState, Property<A> property) {
 							return newState.with(property, sourceState.get(property));
 						}
@@ -209,7 +215,12 @@ public class SpookyAutumnForests {
 //					Field get = net.minecraft.block.Blocks.class.getDeclaredField(sa[1]);
 //					get.setAccessible(true);
 //					Block block = new LeavesBlock(AbstractBlock.Properties.from((AbstractBlock) get.get(null)));
-					Block block = new LeavesBlock(AbstractBlock.Properties.from(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(sa[1].toLowerCase()))));
+					Block block = new LeavesBlock(AbstractBlock.Properties.from(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(sa[1].toLowerCase())))) {
+						@Override
+						public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
+							return 60;
+						}
+					};
 					block.setRegistryName("spooky_autumn_forests", sa[0]);
 					blockRegistryEvent.getRegistry().register(block);
 					blocks.put(sa[0], block);
