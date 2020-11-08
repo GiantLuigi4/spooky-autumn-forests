@@ -236,7 +236,7 @@ public class Datagen {
 			allBlocks.add(sa[0]);
 		}
 		for (String[] sa : Registries.doors) {
-			genDoorBlock(sa[0]);
+//			genDoorBlock(sa[0]);
 			addLangEntry(sa[0], lang);
 			allBlocks.add(sa[0]);
 		}
