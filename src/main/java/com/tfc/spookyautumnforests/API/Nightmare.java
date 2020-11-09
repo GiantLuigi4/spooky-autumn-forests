@@ -199,7 +199,16 @@ public class Nightmare {
 					pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
 					
 					for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
-						EntityType<?> type = spawns[world.getRandom().nextInt(spawns.length - 1)];
+						EntityType<?> type;
+						if (spawns.length == 1) {
+							type = spawns[0];
+						} else {
+							try {
+								type = spawns[world.getRandom().nextInt(spawns.length)];
+							} catch (Throwable ignored) {
+								type = spawns[0];
+							}
+						}
 						Entity e = type.create(entity.world);
 						
 						if (e != null) {
