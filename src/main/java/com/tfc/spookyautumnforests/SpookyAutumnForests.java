@@ -1,18 +1,28 @@
 package com.tfc.spookyautumnforests;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
+import com.tfc.spookyautumnforests.API.Nightmare;
 import net.minecraft.block.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
+import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
+import net.minecraft.network.play.server.SEntityEquipmentPacket;
+import net.minecraft.network.play.server.SEntityMetadataPacket;
+import net.minecraft.network.play.server.SEntityTeleportPacket;
 import net.minecraft.state.Property;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
@@ -40,7 +50,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.world.gen.feature.Features.*;
@@ -48,49 +58,177 @@ import static net.minecraft.world.gen.feature.Features.*;
 @Mod("spooky_autumn_forests")
 public class SpookyAutumnForests {
 	
+	private static final NightmareWorld nightmareWorld = new NightmareWorld(World.OVERWORLD, false, false, 0L);
+	protected static Item nightmare_fuel;
+	
 	public SpookyAutumnForests() {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
 		bus.register(RegistryEvents.class);
+		
 		if (FMLEnvironment.dist.isClient()) {
 			bus.addListener(this::clientSetup);
 			MinecraftForge.EVENT_BUS.addListener(Client::onTick);
+			MinecraftForge.EVENT_BUS.addListener(Client::renderEntity);
 		}
+		
 		MinecraftForge.EVENT_BUS.addListener(this::onEntitySpawn);
 	}
 	
 	private void onEntitySpawn(LivingEvent.LivingUpdateEvent t) {
 		if (t.getEntityLiving().getEntityWorld().isRemote)
 			return;
+		
 		IWorld world = t.getEntity().world;
-		Biome b = world.getBiome(t.getEntity().getPosition());
-		ResourceLocation regName = b.getRegistryName();
-		if (t.getEntityLiving() instanceof PlayerEntity) {
-			//thank you noeppi_noeppi
-			if (b.getAmbience().getSkyColor() == 0) {
-				if (world.getWorldInfo().getDayTime() % 1000 == 0) {
-					BlockPos pos = new BlockPos(t.getEntity().getPosition());
-					pos = pos.add((world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1));
-					pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
-					EntityType<?>[] entities = new EntityType[]{
-							EntityType.ZOMBIE,
-							EntityType.SKELETON,
-							EntityType.SPIDER,
-							EntityType.CREEPER,
-					};
-					for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
-						EntityType<?> type = entities[world.getRandom().nextInt(entities.length - 1)];
-						Entity e = type.create(t.getEntity().getEntityWorld());
-						if (e != null) {
-							e.setPosition(pos.getX(), pos.getY(), pos.getZ());
-							world.addEntity(e);
+		
+		if (!world.getClass().equals(nightmareWorld.getClass())) {
+			Biome b = world.getBiome(t.getEntity().getPosition());
+			ResourceLocation regName = b.getRegistryName();
+			
+			if (t.getEntityLiving() instanceof PlayerEntity) {
+				//thank you noeppi_noeppi
+				if (b.getAmbience().getSkyColor() == 0) {
+					if ((world.getWorldInfo().getGameTime() % 100) == 0) {
+						if (world.getRandom().nextDouble() > 0.25) {
+							BlockPos pos = new BlockPos(t.getEntity().getPosition());
+							pos = pos.add((world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1));
+							pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
+							EntityType<?>[] entities = new EntityType[]{
+									EntityType.ZOMBIE,
+									EntityType.ZOMBIE,
+									EntityType.SKELETON,
+									EntityType.SKELETON,
+									EntityType.SPIDER,
+									EntityType.CREEPER,
+									EntityType.CREEPER,
+							};
+							
+							for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
+								EntityType<?> type = entities[world.getRandom().nextInt(entities.length - 1)];
+								Entity e = type.create(t.getEntityLiving().world);
+								
+								if (e != null) {
+									e.setPosition(pos.getX(), pos.getY(), pos.getZ());
+									
+									if (e instanceof SkeletonEntity) {
+										e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
+										e.setItemStackToSlot(EquipmentSlotType.MAINHAND, new ItemStack(Items.BOW));
+									} else if (e instanceof ZombieEntity)
+										e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.ZOMBIE_HEAD));
+									else if (e instanceof CreeperEntity)
+										e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.CREEPER_HEAD));
+									
+									e.setItemStackToSlot(EquipmentSlotType.FEET, new ItemStack(nightmare_fuel, new Random().nextInt(3)));
+									
+									e.addTag("nightmare_mob");
+									
+									((LivingEntity) e).setHealth(1);
+									
+									((ServerPlayerEntity) t.getEntity()).connection.sendPacket(e.createSpawnPacket());
+									Nightmare.addNightmareEntity((PlayerEntity) t.getEntity(), e);
+									
+									List<Pair<EquipmentSlotType, ItemStack>> p_i241270_2_ = ImmutableList.of(
+											Pair.of(EquipmentSlotType.FEET, new ItemStack(nightmare_fuel)),
+											Pair.of(EquipmentSlotType.MAINHAND, ((LivingEntity) e).getHeldItem(Hand.MAIN_HAND))
+									);
+									
+									((ServerPlayerEntity) t.getEntity()).connection.sendPacket(new SEntityEquipmentPacket(e.getEntityId(), p_i241270_2_));
+								}
+							}
 						}
 					}
 				}
-			}
-		} else {
-			if (regName != null)
-				if (regName.toString().equals("spooky_autumn_forests:nightmare_forest")) {
+				
+				if (Nightmare.nightmares.containsKey(t.getEntity().getEntityId())) {
+					nightmareWorld.parent = t.getEntity().world;
+					nightmareWorld.targetPlayer = t.getEntity().getEntityId();
+					
+					ArrayList<Entity> toRemove = new ArrayList<>();
+					
+					for (Entity e : Nightmare.nightmares.get(t.getEntity().getEntityId())) {
+						//Tick the entity
+						try {
+							((MobEntity) e).setNoAI(false);
+							((MobEntity) e).setAttackTarget(t.getEntityLiving());
+							((MobEntity) e).setLastAttackedEntity(t.getEntityLiving());
+							((MobEntity) e).setAggroed(true);
+							((LivingEntity) e).isLoaded = true;
+							
+							if (!world.getBlockState(new BlockPos(e.getEyePosition(0))).getFluidState().isEmpty()) {
+								e.move(MoverType.SELF, new Vector3d(0, 10, 0));
+								e.setMotion(e.getMotion().add(0, 2, 0));
+							}
+							
+							ModifiableAttributeInstance attrib = ((MobEntity) e).getAttribute(Attributes.FOLLOW_RANGE);
+							
+							if (attrib != null) attrib.setBaseValue(100000);
+							
+							((MobEntity) e).tick();
+							
+							for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, e.getBoundingBox())) {
+								if (!arrow.isOnGround()) {
+									if (arrow.func_234616_v_() instanceof LivingEntity) {
+										((MobEntity) e).attackEntityFrom(DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())), 10);
+										arrow.remove();
+									}
+								}
+							}
+							
+							if (!e.isAlive() || e.removed || e.getDistance(t.getEntityLiving()) >= (64 + 32) || e.ticksExisted >= 64000) {
+								try {
+									e.captureDrops().forEach((stack) -> {
+										world.addEntity(stack);
+									});
+								} catch (Throwable ignored) {
+								}
+								e.remove(false);
+								toRemove.add(e);
+							}
+						} catch (Throwable err) {
+							StringBuilder builder = new StringBuilder(err.toString());
+							builder.append("\n");
+							
+							for (StackTraceElement element : err.getStackTrace())
+								builder.append(element.toString()).append("\n");
+							
+							if (builder.toString().length() > "java.lang.ClassCastException".length() + 5)
+								
+								System.out.println(builder.toString());
+						}
+
+//						e.setPosition(t.getEntity().getPositionVec().x,t.getEntity().getPositionVec().y,t.getEntity().getPositionVec().z);
+						
+						//Setup packets
+						SEntityTeleportPacket packet = new SEntityTeleportPacket(e);
+						SEntityMetadataPacket packet1 = new SEntityMetadataPacket(e.getEntityId(), e.getDataManager(), true);
+						
+						//Send the packets
+						((ServerPlayerEntity) t.getEntity()).connection.sendPacket(packet);
+						((ServerPlayerEntity) t.getEntity()).connection.sendPacket(packet1);
+					}
+					
+					for (Entity e : toRemove) {
+						e.setPosition(0, -100000, 0);
+						e.remove();
+						SEntityTeleportPacket packet = new SEntityTeleportPacket(e);
+						Nightmare.removeNightmareEntity((PlayerEntity) t.getEntity(), e.getEntityId());
+						((ServerPlayerEntity) t.getEntity()).connection.sendPacket(packet);
+					}
+				}
+			} else {
+				if (regName != null)
+					if (regName.toString().equals("spooky_autumn_forests:nightmare_forest")) {
+						if (t.getEntityLiving() instanceof SkeletonEntity)
+							t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
+						else if (t.getEntityLiving() instanceof ZombieEntity)
+							t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.ZOMBIE_HEAD));
+						else
+							t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(RegistryEvents.getCopperLeaves()));
+						t.getEntityLiving().extinguish();
+					}
+				
+				//thank you noeppi_noeppi
+				if (b.getAmbience().getSkyColor() == 0) {
 					if (t.getEntityLiving() instanceof SkeletonEntity)
 						t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
 					else if (t.getEntityLiving() instanceof ZombieEntity)
@@ -99,15 +237,6 @@ public class SpookyAutumnForests {
 						t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(RegistryEvents.getCopperLeaves()));
 					t.getEntityLiving().extinguish();
 				}
-			//thank you noeppi_noeppi
-			if (b.getAmbience().getSkyColor() == 0) {
-				if (t.getEntityLiving() instanceof SkeletonEntity)
-					t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
-				else if (t.getEntityLiving() instanceof ZombieEntity)
-					t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.ZOMBIE_HEAD));
-				else
-					t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(RegistryEvents.getCopperLeaves()));
-				t.getEntityLiving().extinguish();
 			}
 		}
 	}
@@ -480,6 +609,8 @@ public class SpookyAutumnForests {
 			}
 			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_copper_sapling"), new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests", "spooky_wood_copper_sapling"));
 			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_sapling"), new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests", "spooky_wood_sapling"));
+			SpookyAutumnForests.nightmare_fuel = new Item(new Item.Properties().group(ItemGroup.MISC)).setRegistryName("spooky_autumn_forests:nightmare_fuel");
+			itemRegistryEvent.getRegistry().register(SpookyAutumnForests.nightmare_fuel);
 		}
 	}
 }

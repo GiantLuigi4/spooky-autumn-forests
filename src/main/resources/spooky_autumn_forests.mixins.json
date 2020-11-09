@@ -6,6 +6,9 @@
   "client": [
     "WorldTimePacket"
   ],
+  "mixins": [
+    "AttackPacket"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

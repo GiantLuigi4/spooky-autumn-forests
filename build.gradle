@@ -131,6 +131,10 @@ mixin {
     add sourceSets.main, "spooky_autumn_forests.refmap.json"
 }
 
+minecraft {
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+}
+
 jar {
     manifest {
         attributes([
