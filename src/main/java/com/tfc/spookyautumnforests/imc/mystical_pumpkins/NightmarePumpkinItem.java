@@ -24,8 +24,8 @@ public class NightmarePumpkinItem extends MysticalPumpkinItem {
 						EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.ZOMBIE,
 						EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON,
 						EntityType.SPIDER, EntityType.SPIDER, EntityType.SPIDER, EntityType.SPIDER,
+						RegisterHandler.DRAGOURD.get(),
 						EntityType.CREEPER, EntityType.CREEPER, EntityType.CREEPER, EntityType.CREEPER,
-						RegisterHandler.DRAGOURD.get()
 				}
 		);
 	}

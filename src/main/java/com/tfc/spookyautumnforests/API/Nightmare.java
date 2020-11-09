@@ -152,7 +152,13 @@ public class Nightmare {
 					};
 					
 					for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
-						EntityType<?> type = entities[world.getRandom().nextInt(entities.length - 1)];
+						EntityType<?> type;
+						try {
+							type = entities[world.getRandom().nextInt(entities.length)];
+						} catch (Throwable ignored) {
+							type = entities[0];
+						}
+						
 						Entity e = type.create(entity.world);
 						
 						if (e != null) {

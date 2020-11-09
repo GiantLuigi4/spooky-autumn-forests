@@ -159,8 +159,6 @@ public class SpookyAutumnForests {
 								
 								System.out.println(builder.toString());
 						}
-
-//						e.setPosition(t.getEntity().getPositionVec().x,t.getEntity().getPositionVec().y,t.getEntity().getPositionVec().z);
 						
 						//Setup packets
 						SEntityTeleportPacket packet = new SEntityTeleportPacket(e);
