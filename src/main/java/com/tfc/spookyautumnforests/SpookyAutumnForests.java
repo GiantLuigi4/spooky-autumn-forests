@@ -41,6 +41,7 @@ import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.common.world.MobSpawnInfoBuilder;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -73,6 +74,11 @@ public class SpookyAutumnForests {
 		}
 		
 		MinecraftForge.EVENT_BUS.addListener(this::onEntitySpawn);
+		MinecraftForge.EVENT_BUS.addListener(this::onPlayerLeave);
+	}
+	
+	public void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+		Nightmare.getNightmaresForPlayer(event.getPlayer()).clear();
 	}
 	
 	private void onEntitySpawn(LivingEvent.LivingUpdateEvent t) {
