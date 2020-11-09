@@ -3,15 +3,18 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
         mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
         maven { url 'https://dist.creeper.host/Sponge/maven' }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath "com.wynprice.cursemaven:CurseMaven:2.1.4"
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: "com.wynprice.cursemaven"
 
 group = 'com.tfc'
 version = ''
@@ -103,6 +106,9 @@ dependencies {
     compile 'org.jetbrains:annotations:16.0.2'
 
     compile 'org.spongepowered:mixin:0.8'
+
+    compileOnly fg.deobf("curse.maven:mystical-pumpkins:3104400")
+    implementation fg.deobf("curse.maven:geckolib:3071704")
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "spooky_autumn_forests:block/mystical_pumpkins/dream_pumpkin",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "spooky_autumn_forests:block/mystical_pumpkins/dream_pumpkin"
+    },
+    "facing=south": {
+      "model": "spooky_autumn_forests:block/mystical_pumpkins/dream_pumpkin",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "spooky_autumn_forests:block/mystical_pumpkins/dream_pumpkin",
+      "y": 270
+    }
+  }
+}

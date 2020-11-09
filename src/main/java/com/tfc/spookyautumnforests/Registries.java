@@ -35,5 +35,7 @@ public class Registries {
 			"spooky_wood_sapling",
 			"spooky_wood_copper_sapling",
 			"nightmare_fuel",
+			"nightmare_pumpkin",
+			"dream_pumpkin",
 	};
 }

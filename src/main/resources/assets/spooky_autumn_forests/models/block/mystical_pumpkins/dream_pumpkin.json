@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "spooky_autumn_forests:block/mystical_pumpkins/dream_pumpkin_top",
+    "front": "spooky_autumn_forests:block/mystical_pumpkins/dream_pumpkin_face",
+    "side": "spooky_autumn_forests:block/mystical_pumpkins/dream_pumpkin_side"
+  }
+}

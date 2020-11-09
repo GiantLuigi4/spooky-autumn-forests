@@ -1,13 +1,11 @@
 package com.tfc.spookyautumnforests;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
 import com.tfc.spookyautumnforests.API.Nightmare;
+import com.tfc.spookyautumnforests.imc.mystical_pumpkins.*;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,7 +13,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
-import net.minecraft.network.play.server.SEntityEquipmentPacket;
 import net.minecraft.network.play.server.SEntityMetadataPacket;
 import net.minecraft.network.play.server.SEntityTeleportPacket;
 import net.minecraft.state.Property;
@@ -29,7 +26,6 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.*;
 import net.minecraft.world.gen.GenerationStage;
-import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.carver.WorldCarver;
 import net.minecraft.world.gen.feature.ProbabilityConfig;
 import net.minecraft.world.gen.surfacebuilders.DefaultSurfaceBuilder;
@@ -44,23 +40,28 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.world.gen.feature.Features.*;
 
 @Mod("spooky_autumn_forests")
 public class SpookyAutumnForests {
-	
 	private static final NightmareWorld nightmareWorld = new NightmareWorld(World.OVERWORLD, false, false, 0L);
-	protected static Item nightmare_fuel;
+	public static Item nightmare_fuel;
+	public static Item nightmare_pumpkin;
+	public static Item dream_pumpkin;
 	
 	public SpookyAutumnForests() {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -75,6 +76,13 @@ public class SpookyAutumnForests {
 		
 		MinecraftForge.EVENT_BUS.addListener(this::onEntitySpawn);
 		MinecraftForge.EVENT_BUS.addListener(this::onPlayerLeave);
+		bus.addListener(this::commonSetup);
+	}
+	
+	private void commonSetup(FMLCommonSetupEvent event) {
+		if (ModList.get().isLoaded("mystical_pumpkins")) {
+			RecipeRegistry.init();
+		}
 	}
 	
 	public void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
@@ -93,57 +101,7 @@ public class SpookyAutumnForests {
 			
 			if (t.getEntityLiving() instanceof PlayerEntity) {
 				//thank you noeppi_noeppi
-				if (b.getAmbience().getSkyColor() == 0) {
-					if ((world.getWorldInfo().getGameTime() % 100) == 0) {
-						if (world.getRandom().nextDouble() > 0.25) {
-							BlockPos pos = new BlockPos(t.getEntity().getPosition());
-							pos = pos.add((world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1));
-							pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
-							EntityType<?>[] entities = new EntityType[]{
-									EntityType.ZOMBIE,
-									EntityType.ZOMBIE,
-									EntityType.SKELETON,
-									EntityType.SKELETON,
-									EntityType.SPIDER,
-									EntityType.CREEPER,
-									EntityType.CREEPER,
-							};
-							
-							for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
-								EntityType<?> type = entities[world.getRandom().nextInt(entities.length - 1)];
-								Entity e = type.create(t.getEntityLiving().world);
-								
-								if (e != null) {
-									e.setPosition(pos.getX(), pos.getY(), pos.getZ());
-									
-									if (e instanceof SkeletonEntity) {
-										e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
-										e.setItemStackToSlot(EquipmentSlotType.MAINHAND, new ItemStack(Items.BOW));
-									} else if (e instanceof ZombieEntity)
-										e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.ZOMBIE_HEAD));
-									else if (e instanceof CreeperEntity)
-										e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.CREEPER_HEAD));
-									
-									e.setItemStackToSlot(EquipmentSlotType.FEET, new ItemStack(nightmare_fuel, new Random().nextInt(3)));
-									
-									e.addTag("nightmare_mob");
-									
-									((LivingEntity) e).setHealth(1);
-									
-									((ServerPlayerEntity) t.getEntity()).connection.sendPacket(e.createSpawnPacket());
-									Nightmare.addNightmareEntity((PlayerEntity) t.getEntity(), e);
-									
-									List<Pair<EquipmentSlotType, ItemStack>> p_i241270_2_ = ImmutableList.of(
-											Pair.of(EquipmentSlotType.FEET, new ItemStack(nightmare_fuel)),
-											Pair.of(EquipmentSlotType.MAINHAND, ((LivingEntity) e).getHeldItem(Hand.MAIN_HAND))
-									);
-									
-									((ServerPlayerEntity) t.getEntity()).connection.sendPacket(new SEntityEquipmentPacket(e.getEntityId(), p_i241270_2_));
-								}
-							}
-						}
-					}
-				}
+				if (b.getAmbience().getSkyColor() == 0) Nightmare.handleSpawns((PlayerEntity) t.getEntity());
 				
 				if (Nightmare.nightmares.containsKey(t.getEntity().getEntityId())) {
 					nightmareWorld.parent = t.getEntity().world;
@@ -377,6 +335,18 @@ public class SpookyAutumnForests {
 				Block block = new SaplingBlock(AbstractBlock.Properties.from(Blocks.OAK_SAPLING), false, true).setRegistryName("spooky_autumn_forests", "spooky_forests_tree");
 				blockRegistryEvent.getRegistry().register(block);
 				blocks.put("spooky_forests_tree", block);
+			}
+			if (ModList.get().isLoaded("mystical_pumpkins")) {
+				{
+					Block block = new NightmarePumpkinBlock().setRegistryName("spooky_autumn_forests:nightmare_pumpkin");
+					blockRegistryEvent.getRegistry().register(block);
+					blocks.put("nightmare_pumpkin", block);
+				}
+				{
+					Block block = new DreamPumpkinBlock().setRegistryName("spooky_autumn_forests:dream_pumpkin");
+					blockRegistryEvent.getRegistry().register(block);
+					blocks.put("dream_pumpkin", block);
+				}
 			}
 		}
 		
@@ -617,6 +587,14 @@ public class SpookyAutumnForests {
 			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_sapling"), new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests", "spooky_wood_sapling"));
 			SpookyAutumnForests.nightmare_fuel = new Item(new Item.Properties().group(ItemGroup.MISC)).setRegistryName("spooky_autumn_forests:nightmare_fuel");
 			itemRegistryEvent.getRegistry().register(SpookyAutumnForests.nightmare_fuel);
+			if (ModList.get().isLoaded("mystical_pumpkins")) {
+				nightmare_pumpkin = new NightmarePumpkinItem(blocks.get("nightmare_pumpkin"), new Item.Properties().group(ItemGroup.MISC)).setRegistryName("spooky_autumn_forests:nightmare_pumpkin");
+				dream_pumpkin = new DreamPumpkinItem(blocks.get("dream_pumpkin"), new Item.Properties().group(ItemGroup.MISC)).setRegistryName("spooky_autumn_forests:dream_pumpkin");
+				itemRegistryEvent.getRegistry().registerAll(
+						nightmare_pumpkin,
+						dream_pumpkin
+				);
+			}
 		}
 	}
 }
