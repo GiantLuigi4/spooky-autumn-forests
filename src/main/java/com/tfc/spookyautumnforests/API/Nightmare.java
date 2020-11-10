@@ -204,7 +204,8 @@ public class Nightmare {
 			if ((world.getWorldInfo().getGameTime() % 100) == 0) {
 				if (world.getRandom().nextDouble() > 0.25) {
 					BlockPos pos = new BlockPos(entity.getPosition());
-					pos = pos.add((world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1));
+					int dist = 32;
+					pos = pos.add((world.getRandom().nextInt(dist) + dist) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(dist) + dist) * (world.getRandom().nextBoolean() ? -1 : 1));
 					pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
 					
 					for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
