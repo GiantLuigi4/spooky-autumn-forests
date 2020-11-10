@@ -58,7 +58,7 @@ import static net.minecraft.world.gen.feature.Features.*;
 
 @Mod("spooky_autumn_forests")
 public class SpookyAutumnForests {
-	private static final NightmareWorld nightmareWorld = new NightmareWorld(World.OVERWORLD, false, false, 0L);
+//	private static final NightmareWorld nightmareWorld = new NightmareWorld(World.OVERWORLD, false, false, 0L);
 	public static Item nightmare_fuel;
 	public static Item nightmare_pumpkin;
 	public static Item dream_pumpkin;
@@ -94,8 +94,8 @@ public class SpookyAutumnForests {
 			return;
 		
 		IWorld world = t.getEntity().world;
-		
-		if (!world.getClass().equals(nightmareWorld.getClass())) {
+
+//		if (!world.getClass().equals(nightmareWorld.getClass())) {
 			Biome b = world.getBiome(t.getEntity().getPosition());
 			ResourceLocation regName = b.getRegistryName();
 			
@@ -104,8 +104,8 @@ public class SpookyAutumnForests {
 				if (b.getAmbience().getSkyColor() == 0) Nightmare.handleSpawns((PlayerEntity) t.getEntity());
 				
 				if (Nightmare.nightmares.containsKey(t.getEntity().getEntityId())) {
-					nightmareWorld.parent = t.getEntity().world;
-					nightmareWorld.targetPlayer = t.getEntity().getEntityId();
+//					nightmareWorld.parent = t.getEntity().world;
+//					nightmareWorld.targetPlayer = t.getEntity().getEntityId();
 					
 					ArrayList<Entity> toRemove = new ArrayList<>();
 					
@@ -130,11 +130,17 @@ public class SpookyAutumnForests {
 							((MobEntity) e).tick();
 							
 							for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, e.getBoundingBox())) {
-								if (!arrow.isOnGround()) {
-									if (arrow.func_234616_v_() instanceof LivingEntity) {
-										((MobEntity) e).attackEntityFrom(DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())), 10);
-										arrow.remove();
+								try {
+									if (!arrow.isOnGround()) {
+										if (arrow.func_234616_v_() instanceof LivingEntity) {
+											((MobEntity) e).attackEntityFrom(
+													DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())),
+													Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4)
+											);
+											arrow.remove();
+										}
 									}
+								} catch (Throwable ignored) {
 								}
 							}
 							
@@ -200,7 +206,7 @@ public class SpookyAutumnForests {
 					t.getEntityLiving().extinguish();
 				}
 			}
-		}
+//		}
 	}
 	
 	public void clientSetup(FMLClientSetupEvent event) {

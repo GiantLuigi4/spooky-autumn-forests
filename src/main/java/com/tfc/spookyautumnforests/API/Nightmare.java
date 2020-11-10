@@ -16,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.play.server.SEntityEquipmentPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.Heightmap;
@@ -176,7 +177,9 @@ public class Nightmare {
 							
 							e.addTag("nightmare_mob");
 							
-							((LivingEntity) e).setHealth(1);
+							if (type.getRegistryName().equals("mystical_pumpkins:dragourd"))
+								((LivingEntity) e).setHealth(6);
+							else ((LivingEntity) e).setHealth(1);
 							
 							((ServerPlayerEntity) entity).connection.sendPacket(e.createSpawnPacket());
 							Nightmare.addNightmareEntity((PlayerEntity) entity, e);
@@ -232,7 +235,9 @@ public class Nightmare {
 							
 							e.addTag("nightmare_mob");
 							
-							((LivingEntity) e).setHealth(1);
+							if (type.getRegistryName().equals(new ResourceLocation("mystical_pumpkins:dragourd")))
+								((LivingEntity) e).setHealth(6);
+							else ((LivingEntity) e).setHealth(1);
 							
 							((ServerPlayerEntity) entity).connection.sendPacket(e.createSpawnPacket());
 							Nightmare.addNightmareEntity((PlayerEntity) entity, e);
