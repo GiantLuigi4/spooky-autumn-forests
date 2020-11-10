@@ -112,28 +112,32 @@ public class SpookyAutumnForests {
 					for (Entity e : Nightmare.nightmares.get(t.getEntity().getEntityId())) {
 						//Tick the entity
 						try {
-							((MobEntity) e).setNoAI(false);
-							((MobEntity) e).setAttackTarget(t.getEntityLiving());
-							((MobEntity) e).setLastAttackedEntity(t.getEntityLiving());
-							((MobEntity) e).setAggroed(true);
-							((LivingEntity) e).isLoaded = true;
+							if (e instanceof MobEntity) {
+								((MobEntity) e).setNoAI(false);
+								((MobEntity) e).setAttackTarget(t.getEntityLiving());
+								((MobEntity) e).setLastAttackedEntity(t.getEntityLiving());
+								((MobEntity) e).setAggroed(true);
+								
+								ModifiableAttributeInstance attrib = ((MobEntity) e).getAttribute(Attributes.FOLLOW_RANGE);
+								
+								if (attrib != null) attrib.setBaseValue(100000);
+							}
+							if (e instanceof LivingEntity) {
+								((LivingEntity) e).isLoaded = true;
+							}
 							
 							if (!world.getBlockState(new BlockPos(e.getEyePosition(0))).getFluidState().isEmpty()) {
 								e.move(MoverType.SELF, new Vector3d(0, 10, 0));
 								e.setMotion(e.getMotion().add(0, 2, 0));
 							}
 							
-							ModifiableAttributeInstance attrib = ((MobEntity) e).getAttribute(Attributes.FOLLOW_RANGE);
-							
-							if (attrib != null) attrib.setBaseValue(100000);
-							
-							((MobEntity) e).tick();
+							e.tick();
 							
 							for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, e.getBoundingBox())) {
 								try {
 									if (!arrow.isOnGround()) {
 										if (arrow.func_234616_v_() instanceof LivingEntity) {
-											((MobEntity) e).attackEntityFrom(
+											e.attackEntityFrom(
 													DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())),
 													Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4)
 											);

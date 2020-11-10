@@ -242,7 +242,7 @@ public class Client {
 				event.getMatrixStack().translate(0, -1.5, 0);
 				if (event.getRenderer().getEntityModel() instanceof BipedModel)
 					event.getRenderer().getEntityModel().isChild = false;
-				event.getRenderer().getEntityModel().setLivingAnimations(event.getEntity(), event.getEntity().limbSwing, event.getEntity().limbSwingAmount, event.getPartialRenderTick());
+				event.getRenderer().getEntityModel().setLivingAnimations(event.getEntity(), event.getEntity().limbSwing, event.getEntity().limbSwingAmount, 0);
 				event.getRenderer().getEntityModel().setRotationAngles(
 						event.getEntity(),
 						event.getEntity().limbSwing,
