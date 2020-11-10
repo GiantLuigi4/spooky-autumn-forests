@@ -177,9 +177,14 @@ public class Nightmare {
 							
 							e.addTag("nightmare_mob");
 							
-							if (type.getRegistryName().equals("mystical_pumpkins:dragourd"))
-								((LivingEntity) e).setHealth(6);
-							else ((LivingEntity) e).setHealth(1);
+							try {
+								if (e instanceof LivingEntity) {
+									if (type.getRegistryName().equals(new ResourceLocation("mystical_pumpkins:dragourd")))
+										((LivingEntity) e).setHealth(12);
+									else ((LivingEntity) e).setHealth(6);
+								}
+							} catch (Throwable ignored) {
+							}
 							
 							((ServerPlayerEntity) entity).connection.sendPacket(e.createSpawnPacket());
 							Nightmare.addNightmareEntity((PlayerEntity) entity, e);
@@ -239,8 +244,8 @@ public class Nightmare {
 							try {
 								if (e instanceof LivingEntity) {
 									if (type.getRegistryName().equals(new ResourceLocation("mystical_pumpkins:dragourd")))
-										((LivingEntity) e).setHealth(6);
-									else ((LivingEntity) e).setHealth(1);
+										((LivingEntity) e).setHealth(12);
+									else ((LivingEntity) e).setHealth(6);
 								}
 							} catch (Throwable ignored) {
 							}

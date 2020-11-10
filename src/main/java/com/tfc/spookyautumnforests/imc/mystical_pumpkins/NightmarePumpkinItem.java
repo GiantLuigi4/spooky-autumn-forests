@@ -18,15 +18,28 @@ public class NightmarePumpkinItem extends MysticalPumpkinItem {
 	@Override
 	public void onArmorTick(ItemStack stack, World world, PlayerEntity player) {
 		super.onArmorTick(stack, world, player);
-		if (player instanceof ServerPlayerEntity) Nightmare.handleSpawns(
-				player,
-				new EntityType[]{
-						EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.ZOMBIE,
-						EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON,
-						EntityType.SPIDER, EntityType.SPIDER, EntityType.SPIDER, EntityType.SPIDER,
-						RegisterHandler.DRAGOURD.get(),
-						EntityType.CREEPER, EntityType.CREEPER, EntityType.CREEPER, EntityType.CREEPER,
-				}
-		);
+		if (player instanceof ServerPlayerEntity) {
+			if (((ServerPlayerEntity) player).getServerWorld().getDimensionKey().equals(World.THE_END)) {
+				Nightmare.handleSpawns(
+						player,
+						new EntityType[]{
+								EntityType.SHULKER,
+								EntityType.ENDERMITE, EntityType.ENDERMITE, EntityType.ENDERMITE,
+								EntityType.ENDERMAN, EntityType.ENDERMAN, EntityType.ENDERMAN,
+						}
+				);
+			} else {
+				Nightmare.handleSpawns(
+						player,
+						new EntityType[]{
+								EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.ZOMBIE,
+								EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON,
+								EntityType.SPIDER, EntityType.SPIDER, EntityType.SPIDER, EntityType.SPIDER,
+								RegisterHandler.DRAGOURD.get(),
+								EntityType.CREEPER, EntityType.CREEPER, EntityType.CREEPER, EntityType.CREEPER,
+						}
+				);
+			}
+		}
 	}
 }

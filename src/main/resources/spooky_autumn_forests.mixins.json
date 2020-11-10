@@ -4,10 +4,11 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "spooky_autumn_forests.refmap.json",
   "client": [
-    "WorldTimePacket"
+    "ClientWorldInfoMixin",
+    "WorldTimePacketMixin"
   ],
   "mixins": [
-    "AttackPacket"
+    "AttackPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

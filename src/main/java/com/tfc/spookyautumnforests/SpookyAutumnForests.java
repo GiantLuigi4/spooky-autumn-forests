@@ -101,7 +101,7 @@ public class SpookyAutumnForests {
 			
 			if (t.getEntityLiving() instanceof PlayerEntity) {
 				//thank you noeppi_noeppi
-				if (b.getAmbience().getSkyColor() == 0) Nightmare.handleSpawns((PlayerEntity) t.getEntity());
+				if (b.getAmbience().getSkyColor() == -128) Nightmare.handleSpawns((PlayerEntity) t.getEntity());
 				
 				if (Nightmare.nightmares.containsKey(t.getEntity().getEntityId())) {
 //					nightmareWorld.parent = t.getEntity().world;
@@ -139,7 +139,7 @@ public class SpookyAutumnForests {
 										if (arrow.func_234616_v_() instanceof LivingEntity) {
 											e.attackEntityFrom(
 													DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())),
-													Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4)
+													(int) (Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4) * arrow.getDamage())
 											);
 											arrow.remove();
 										}
@@ -200,7 +200,7 @@ public class SpookyAutumnForests {
 					}
 				
 				//thank you noeppi_noeppi
-				if (b.getAmbience().getSkyColor() == 0) {
+				if (b.getAmbience().getSkyColor() == -128) {
 					if (t.getEntityLiving() instanceof SkeletonEntity)
 						t.getEntityLiving().setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
 					else if (t.getEntityLiving() instanceof ZombieEntity)
@@ -402,7 +402,7 @@ public class SpookyAutumnForests {
 									.withFoliageColor(color)
 									.setWaterColor(color2)
 									.setWaterFogColor(color2)
-									.withSkyColor(0)
+									.withSkyColor(-128)
 									.withGrassColor(color)
 									.setMoodSound(MoodSoundAmbience.DEFAULT_CAVE)
 									.build()

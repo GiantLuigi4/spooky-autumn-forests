@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SUpdateTimePacket.class)
-public class WorldTimePacket {
+public class WorldTimePacketMixin {
 	@Inject(at = @At("RETURN"), method = "getWorldTime()J")
 	public void alterTime(CallbackInfoReturnable<Long> cir) {
 		if (Minecraft.getInstance().player != null) {
@@ -17,7 +17,7 @@ public class WorldTimePacket {
 					.player.worldClient
 					.getBiome(Minecraft.getInstance()
 							.player.getPosition());
-			if (b.getSkyColor() == 0)
+			if (b.getSkyColor() == -128)
 				cir.setReturnValue(18000L);
 		}
 	}

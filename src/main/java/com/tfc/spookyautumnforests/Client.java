@@ -68,7 +68,7 @@ public class Client {
 			if (event.getEntity().getEntityWorld().getWorldInfo() instanceof ClientWorld.ClientWorldInfo) {
 				ClientWorld.ClientWorldInfo info = ((ClientWorld.ClientWorldInfo) event.getEntity().getEntityWorld().getWorldInfo());
 				if (
-						b.getSkyColor() == 0
+						b.getSkyColor() == -128
 				) {
 					info.setDayTime(18000);
 //					useNormal = false;
