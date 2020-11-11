@@ -5,7 +5,6 @@ import com.tfc.spookyautumnforests.imc.mystical_pumpkins.*;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -153,10 +152,10 @@ public class SpookyAutumnForests {
 								((MobEntity) nightmare).setAttackTarget(player);
 								((MobEntity) nightmare).setLastAttackedEntity(player);
 								((MobEntity) nightmare).setAggroed(true);
-								
-								ModifiableAttributeInstance attrib = ((MobEntity) nightmare).getAttribute(Attributes.FOLLOW_RANGE);
-								
-								if (attrib != null) attrib.setBaseValue(100000);
+
+//								ModifiableAttributeInstance attrib = ((MobEntity) nightmare).getAttribute(Attributes.FOLLOW_RANGE);
+//
+//								if (attrib != null) attrib.setBaseValue(10000);
 							}
 							if (nightmare instanceof LivingEntity) {
 								((LivingEntity) nightmare).isLoaded = true;
@@ -166,8 +165,8 @@ public class SpookyAutumnForests {
 								nightmare.move(MoverType.SELF, new Vector3d(0, 10, 0));
 								nightmare.setMotion(nightmare.getMotion().add(0, 2, 0));
 							}
-
-//							nightmare.baseTick();
+							
+							nightmare.tick();
 							
 							for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, nightmare.getBoundingBox())) {
 								try {
