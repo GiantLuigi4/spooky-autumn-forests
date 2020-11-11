@@ -36,6 +36,7 @@ import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.common.world.MobSpawnInfoBuilder;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -76,6 +77,7 @@ public class SpookyAutumnForests {
 		
 		MinecraftForge.EVENT_BUS.addListener(this::onEntitySpawn);
 		MinecraftForge.EVENT_BUS.addListener(this::onPlayerLeave);
+		MinecraftForge.EVENT_BUS.addListener(this::onTick);
 		bus.addListener(this::commonSetup);
 	}
 	
@@ -94,100 +96,13 @@ public class SpookyAutumnForests {
 			return;
 		
 		IWorld world = t.getEntity().world;
-
+		
+		if (!((LivingEntity) t.getEntity()).getItemStackFromSlot(EquipmentSlotType.FEET).getItem().equals(nightmare_fuel)) {
 //		if (!world.getClass().equals(nightmareWorld.getClass())) {
 			Biome b = world.getBiome(t.getEntity().getPosition());
 			ResourceLocation regName = b.getRegistryName();
 			
-			if (t.getEntityLiving() instanceof PlayerEntity) {
-				//thank you noeppi_noeppi
-				if (b.getAmbience().getSkyColor() == -128) Nightmare.handleSpawns((PlayerEntity) t.getEntity());
-				
-				if (Nightmare.nightmares.containsKey(t.getEntity().getEntityId())) {
-//					nightmareWorld.parent = t.getEntity().world;
-//					nightmareWorld.targetPlayer = t.getEntity().getEntityId();
-					
-					ArrayList<Entity> toRemove = new ArrayList<>();
-					
-					for (Entity e : Nightmare.nightmares.get(t.getEntity().getEntityId())) {
-						//Tick the entity
-						try {
-							if (e instanceof MobEntity) {
-								((MobEntity) e).setNoAI(false);
-								((MobEntity) e).setAttackTarget(t.getEntityLiving());
-								((MobEntity) e).setLastAttackedEntity(t.getEntityLiving());
-								((MobEntity) e).setAggroed(true);
-								
-								ModifiableAttributeInstance attrib = ((MobEntity) e).getAttribute(Attributes.FOLLOW_RANGE);
-								
-								if (attrib != null) attrib.setBaseValue(100000);
-							}
-							if (e instanceof LivingEntity) {
-								((LivingEntity) e).isLoaded = true;
-							}
-							
-							if (!world.getBlockState(new BlockPos(e.getEyePosition(0))).getFluidState().isEmpty()) {
-								e.move(MoverType.SELF, new Vector3d(0, 10, 0));
-								e.setMotion(e.getMotion().add(0, 2, 0));
-							}
-							
-							e.tick();
-							
-							for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, e.getBoundingBox())) {
-								try {
-									if (!arrow.isOnGround()) {
-										if (arrow.func_234616_v_() instanceof LivingEntity) {
-											e.attackEntityFrom(
-													DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())),
-													(int) (Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4) * arrow.getDamage())
-											);
-											arrow.remove();
-										}
-									}
-								} catch (Throwable ignored) {
-								}
-							}
-							
-							if (!e.isAlive() || e.removed || e.getDistance(t.getEntityLiving()) >= (64 + 32) || e.ticksExisted >= 64000) {
-								try {
-									e.captureDrops().forEach((stack) -> {
-										world.addEntity(stack);
-									});
-								} catch (Throwable ignored) {
-								}
-								e.remove(false);
-								toRemove.add(e);
-							}
-						} catch (Throwable err) {
-							StringBuilder builder = new StringBuilder(err.toString());
-							builder.append("\n");
-							
-							for (StackTraceElement element : err.getStackTrace())
-								builder.append(element.toString()).append("\n");
-							
-							if (builder.toString().length() > "java.lang.ClassCastException".length() + 5)
-								
-								System.out.println(builder.toString());
-						}
-						
-						//Setup packets
-						SEntityTeleportPacket packet = new SEntityTeleportPacket(e);
-						SEntityMetadataPacket packet1 = new SEntityMetadataPacket(e.getEntityId(), e.getDataManager(), true);
-						
-						//Send the packets
-						((ServerPlayerEntity) t.getEntity()).connection.sendPacket(packet);
-						((ServerPlayerEntity) t.getEntity()).connection.sendPacket(packet1);
-					}
-					
-					for (Entity e : toRemove) {
-						e.setPosition(0, -100000, 0);
-						e.remove();
-						SEntityTeleportPacket packet = new SEntityTeleportPacket(e);
-						Nightmare.removeNightmareEntity((PlayerEntity) t.getEntity(), e.getEntityId());
-						((ServerPlayerEntity) t.getEntity()).connection.sendPacket(packet);
-					}
-				}
-			} else {
+			if (!(t.getEntity() instanceof PlayerEntity)) {
 				if (regName != null)
 					if (regName.toString().equals("spooky_autumn_forests:nightmare_forest")) {
 						if (t.getEntityLiving() instanceof SkeletonEntity)
@@ -211,6 +126,105 @@ public class SpookyAutumnForests {
 				}
 			}
 //		}
+		}
+	}
+	
+	public void onTick(TickEvent.WorldTickEvent t) {
+		if (!t.world.isRemote) {
+			World world = t.world;
+			for (PlayerEntity player : t.world.getPlayers()) {
+				Biome b = world.getBiome(player.getPosition());
+				ResourceLocation regName = b.getRegistryName();
+				
+				//thank you noeppi_noeppi
+				if (b.getAmbience().getSkyColor() == -128) Nightmare.handleSpawns((PlayerEntity) player);
+				
+				if (Nightmare.nightmares.containsKey(player.getEntityId())) {
+//					nightmareWorld.parent = t.getEntity().world;
+//					nightmareWorld.targetPlayer = t.getEntity().getEntityId();
+					
+					ArrayList<Entity> toRemove = new ArrayList<>();
+					
+					for (Entity nightmare : Nightmare.nightmares.get(player.getEntityId())) {
+						//Tick the entity
+						try {
+							if (nightmare instanceof MobEntity) {
+								((MobEntity) nightmare).setNoAI(false);
+								((MobEntity) nightmare).setAttackTarget(player);
+								((MobEntity) nightmare).setLastAttackedEntity(player);
+								((MobEntity) nightmare).setAggroed(true);
+								
+								ModifiableAttributeInstance attrib = ((MobEntity) nightmare).getAttribute(Attributes.FOLLOW_RANGE);
+								
+								if (attrib != null) attrib.setBaseValue(100000);
+							}
+							if (nightmare instanceof LivingEntity) {
+								((LivingEntity) nightmare).isLoaded = true;
+							}
+							
+							if (!world.getBlockState(new BlockPos(nightmare.getEyePosition(0))).getFluidState().isEmpty()) {
+								nightmare.move(MoverType.SELF, new Vector3d(0, 10, 0));
+								nightmare.setMotion(nightmare.getMotion().add(0, 2, 0));
+							}
+
+//							nightmare.baseTick();
+							
+							for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, nightmare.getBoundingBox())) {
+								try {
+									if (!arrow.isOnGround()) {
+										if (arrow.func_234616_v_() instanceof LivingEntity) {
+											nightmare.attackEntityFrom(
+													DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())),
+													(int) (Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4) * arrow.getDamage())
+											);
+											arrow.remove();
+										}
+									}
+								} catch (Throwable ignored) {
+								}
+							}
+							
+							if (!nightmare.isAlive() || nightmare.removed || nightmare.getDistance(player) >= (64 + 32) || nightmare.ticksExisted >= 64000) {
+								try {
+									nightmare.captureDrops().forEach((stack) -> {
+										world.addEntity(stack);
+									});
+								} catch (Throwable ignored) {
+								}
+								nightmare.remove(false);
+								toRemove.add(nightmare);
+							}
+						} catch (Throwable err) {
+							StringBuilder builder = new StringBuilder(err.toString());
+							builder.append("\n");
+							
+							for (StackTraceElement element : err.getStackTrace())
+								builder.append(element.toString()).append("\n");
+							
+							if (builder.toString().length() > "java.lang.ClassCastException".length() + 5)
+								
+								System.out.println(builder.toString());
+						}
+						
+						//Setup packets
+						SEntityTeleportPacket packet = new SEntityTeleportPacket(nightmare);
+						SEntityMetadataPacket packet1 = new SEntityMetadataPacket(nightmare.getEntityId(), nightmare.getDataManager(), true);
+						
+						//Send the packets
+						((ServerPlayerEntity) player).connection.sendPacket(packet);
+						((ServerPlayerEntity) player).connection.sendPacket(packet1);
+					}
+					
+					for (Entity nightmare : toRemove) {
+						nightmare.setPosition(0, -100000, 0);
+						nightmare.remove();
+						SEntityTeleportPacket packet = new SEntityTeleportPacket(nightmare);
+						Nightmare.removeNightmareEntity(player, nightmare.getEntityId());
+						((ServerPlayerEntity) player).connection.sendPacket(packet);
+					}
+				}
+			}
+		}
 	}
 	
 	public void clientSetup(FMLClientSetupEvent event) {
