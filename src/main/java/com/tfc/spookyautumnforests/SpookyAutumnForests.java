@@ -1,6 +1,7 @@
 package com.tfc.spookyautumnforests;
 
 import com.tfc.spookyautumnforests.API.Nightmare;
+import com.tfc.spookyautumnforests.config.Config;
 import com.tfc.spookyautumnforests.imc.mystical_pumpkins.*;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
@@ -58,7 +59,7 @@ import static net.minecraft.world.gen.feature.Features.*;
 
 @Mod("spooky_autumn_forests")
 public class SpookyAutumnForests {
-//	private static final NightmareWorld nightmareWorld = new NightmareWorld(World.OVERWORLD, false, false, 0L);
+	//	private static final NightmareWorld nightmareWorld = new NightmareWorld(World.OVERWORLD, false, false, 0L);
 	public static Item nightmare_fuel;
 	public static Item nightmare_pumpkin;
 	public static Item dream_pumpkin;
@@ -67,6 +68,8 @@ public class SpookyAutumnForests {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
 		bus.register(RegistryEvents.class);
+		
+		Config.readAndWrite();
 		
 		if (FMLEnvironment.dist.isClient()) {
 			bus.addListener(this::clientSetup);
@@ -129,97 +132,110 @@ public class SpookyAutumnForests {
 	}
 	
 	public void onTick(TickEvent.WorldTickEvent t) {
-		if (!t.world.isRemote) {
-			World world = t.world;
-			for (PlayerEntity player : t.world.getPlayers()) {
-				Biome b = world.getBiome(player.getPosition());
-				ResourceLocation regName = b.getRegistryName();
-				
-				//thank you noeppi_noeppi
-				if (b.getAmbience().getSkyColor() == -128) Nightmare.handleSpawns((PlayerEntity) player);
-				
-				if (Nightmare.nightmares.containsKey(player.getEntityId())) {
+		if (t.phase == TickEvent.Phase.START) {
+			if (!t.world.isRemote) {
+				World world = t.world;
+				for (PlayerEntity player : t.world.getPlayers()) {
+					Biome b = world.getBiome(player.getPosition());
+					ResourceLocation regName = b.getRegistryName();
+					
+					//thank you noeppi_noeppi
+					if (b.getAmbience().getSkyColor() == -128) Nightmare.handleSpawns((PlayerEntity) player);
+					
+					if (Nightmare.nightmares.containsKey(player.getEntityId())) {
 //					nightmareWorld.parent = t.getEntity().world;
 //					nightmareWorld.targetPlayer = t.getEntity().getEntityId();
-					
-					ArrayList<Entity> toRemove = new ArrayList<>();
-					
-					for (Entity nightmare : Nightmare.nightmares.get(player.getEntityId())) {
-						//Tick the entity
-						try {
-							if (nightmare instanceof MobEntity) {
-								((MobEntity) nightmare).setNoAI(false);
-								((MobEntity) nightmare).setAttackTarget(player);
-								((MobEntity) nightmare).setLastAttackedEntity(player);
-								((MobEntity) nightmare).setAggroed(true);
+						
+						ArrayList<Entity> toRemove = new ArrayList<>();
+						
+						for (Entity nightmare : Nightmare.nightmares.get(player.getEntityId())) {
+							//Tick the entity
+							try {
+								if (nightmare instanceof MobEntity) {
+									((MobEntity) nightmare).setNoAI(false);
+									if (Config.shouldRespectGamemodes()) {
+										if ((player.isCreative() || player.isSpectator())) {
+											((MobEntity) nightmare).setAttackTarget(null);
+											((MobEntity) nightmare).setAggroed(false);
+										} else {
+											((MobEntity) nightmare).setAttackTarget(player);
+											((MobEntity) nightmare).setLastAttackedEntity(player);
+											((MobEntity) nightmare).setAggroed(true);
+										}
+									} else {
+										((MobEntity) nightmare).setAttackTarget(player);
+										((MobEntity) nightmare).setLastAttackedEntity(player);
+										((MobEntity) nightmare).setAggroed(true);
+									}
 
 //								ModifiableAttributeInstance attrib = ((MobEntity) nightmare).getAttribute(Attributes.FOLLOW_RANGE);
 //
 //								if (attrib != null) attrib.setBaseValue(10000);
-							}
-							if (nightmare instanceof LivingEntity) {
-								((LivingEntity) nightmare).isLoaded = true;
-							}
-							
-							if (!world.getBlockState(new BlockPos(nightmare.getEyePosition(0))).getFluidState().isEmpty()) {
-								nightmare.move(MoverType.SELF, new Vector3d(0, 10, 0));
-								nightmare.setMotion(nightmare.getMotion().add(0, 2, 0));
-							}
-							
-							nightmare.tick();
-							
-							for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, nightmare.getBoundingBox())) {
-								try {
-									if (!arrow.isOnGround()) {
-										if (arrow.func_234616_v_() instanceof LivingEntity) {
-											nightmare.attackEntityFrom(
-													DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())),
-													(int) (Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4) * arrow.getDamage())
-											);
-											arrow.remove();
-										}
-									}
-								} catch (Throwable ignored) {
 								}
-							}
-							
-							if (!nightmare.isAlive() || nightmare.removed || nightmare.getDistance(player) >= (64 + 32) || nightmare.ticksExisted >= 64000) {
-								try {
-									nightmare.captureDrops().forEach((stack) -> {
-										world.addEntity(stack);
-									});
-								} catch (Throwable ignored) {
+								if (nightmare instanceof LivingEntity) {
+									((LivingEntity) nightmare).isLoaded = true;
 								}
-								nightmare.remove(false);
-								toRemove.add(nightmare);
-							}
-						} catch (Throwable err) {
-							StringBuilder builder = new StringBuilder(err.toString());
-							builder.append("\n");
-							
-							for (StackTraceElement element : err.getStackTrace())
-								builder.append(element.toString()).append("\n");
-							
-							if (builder.toString().length() > "java.lang.ClassCastException".length() + 5)
 								
-								System.out.println(builder.toString());
+								if (!world.getBlockState(new BlockPos(nightmare.getEyePosition(0))).getFluidState().isEmpty()) {
+									nightmare.move(MoverType.SELF, new Vector3d(0, 10, 0));
+									nightmare.setMotion(nightmare.getMotion().add(0, 2, 0));
+								}
+								
+								nightmare.tick();
+								
+								for (ArrowEntity arrow : world.getEntitiesWithinAABB(ArrowEntity.class, nightmare.getBoundingBox())) {
+									try {
+										if (!arrow.isOnGround()) {
+											if (arrow.func_234616_v_() instanceof LivingEntity) {
+												nightmare.attackEntityFrom(
+														DamageSource.causeMobDamage((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())),
+														(int) (Math.min((int) (Objects.requireNonNull(((LivingEntity) Objects.requireNonNull(arrow.func_234616_v_())).getAttribute(Attributes.ATTACK_DAMAGE)).getValue()), 4) * arrow.getDamage())
+												);
+												arrow.remove();
+											}
+										}
+									} catch (Throwable ignored) {
+									}
+								}
+								
+								if (!nightmare.isAlive() || nightmare.removed || nightmare.getDistance(player) >= (64 + 32) || nightmare.ticksExisted >= Config.getNightmareLifetime()) {
+									try {
+										nightmare.captureDrops().forEach((stack) -> {
+											world.addEntity(stack);
+										});
+									} catch (Throwable ignored) {
+									}
+									nightmare.remove(false);
+									toRemove.add(nightmare);
+								}
+							} catch (Throwable err) {
+								StringBuilder builder = new StringBuilder(err.toString());
+								builder.append("\n");
+								
+								for (StackTraceElement element : err.getStackTrace())
+									builder.append(element.toString()).append("\n");
+								
+								if (builder.toString().length() > "java.lang.ClassCastException".length() + 5)
+									
+									System.out.println(builder.toString());
+							}
+							
+							//Setup packets
+							SEntityTeleportPacket packet = new SEntityTeleportPacket(nightmare);
+							SEntityMetadataPacket packet1 = new SEntityMetadataPacket(nightmare.getEntityId(), nightmare.getDataManager(), true);
+							
+							//Send the packets
+							((ServerPlayerEntity) player).connection.sendPacket(packet);
+							((ServerPlayerEntity) player).connection.sendPacket(packet1);
 						}
 						
-						//Setup packets
-						SEntityTeleportPacket packet = new SEntityTeleportPacket(nightmare);
-						SEntityMetadataPacket packet1 = new SEntityMetadataPacket(nightmare.getEntityId(), nightmare.getDataManager(), true);
-						
-						//Send the packets
-						((ServerPlayerEntity) player).connection.sendPacket(packet);
-						((ServerPlayerEntity) player).connection.sendPacket(packet1);
-					}
-					
-					for (Entity nightmare : toRemove) {
-						nightmare.setPosition(0, -100000, 0);
-						nightmare.remove();
-						SEntityTeleportPacket packet = new SEntityTeleportPacket(nightmare);
-						Nightmare.removeNightmareEntity(player, nightmare.getEntityId());
-						((ServerPlayerEntity) player).connection.sendPacket(packet);
+						for (Entity nightmare : toRemove) {
+							nightmare.setPosition(0, -100000, 0);
+							nightmare.remove();
+							SEntityTeleportPacket packet = new SEntityTeleportPacket(nightmare);
+							Nightmare.removeNightmareEntity(player, nightmare.getEntityId());
+							((ServerPlayerEntity) player).connection.sendPacket(packet);
+						}
 					}
 				}
 			}
@@ -606,7 +622,12 @@ public class SpookyAutumnForests {
 			}
 			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_copper_sapling"), new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests", "spooky_wood_copper_sapling"));
 			itemRegistryEvent.getRegistry().register(new BlockItem(blocks.get("spooky_wood_sapling"), new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName("spooky_autumn_forests", "spooky_wood_sapling"));
-			SpookyAutumnForests.nightmare_fuel = new Item(new Item.Properties().group(ItemGroup.MISC)).setRegistryName("spooky_autumn_forests:nightmare_fuel");
+			SpookyAutumnForests.nightmare_fuel = new Item(new Item.Properties().group(ItemGroup.MISC)) {
+				@Override
+				public int getBurnTime(ItemStack itemStack) {
+					return Config.getNightmareFuelBurnTime();
+				}
+			}.setRegistryName("spooky_autumn_forests:nightmare_fuel");
 			itemRegistryEvent.getRegistry().register(SpookyAutumnForests.nightmare_fuel);
 			if (ModList.get().isLoaded("mystical_pumpkins")) {
 				nightmare_pumpkin = new NightmarePumpkinItem(blocks.get("nightmare_pumpkin"), new Item.Properties().group(ItemGroup.MISC)).setRegistryName("spooky_autumn_forests:nightmare_pumpkin");

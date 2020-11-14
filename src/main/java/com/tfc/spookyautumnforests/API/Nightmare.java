@@ -3,6 +3,7 @@ package com.tfc.spookyautumnforests.API;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.tfc.spookyautumnforests.SpookyAutumnForests;
+import com.tfc.spookyautumnforests.config.Config;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -41,7 +42,9 @@ public class Nightmare {
 	 */
 	public static void addNightmareEntity(PlayerEntity player, Entity nightmare) {
 		ArrayList<Entity> nightmaresForThisPlayer = getNightmaresForPlayer(player);
-		nightmaresForThisPlayer.add(nightmare);
+		if (nightmaresForThisPlayer.size() <= Config.getNightmareCap()) {
+			nightmaresForThisPlayer.add(nightmare);
+		}
 	}
 	
 	/**
@@ -137,80 +140,89 @@ public class Nightmare {
 	}
 	
 	public static void handleSpawns(PlayerEntity entity) {
-		if (entity instanceof ServerPlayerEntity) {
-			World world = entity.getEntityWorld();
-			
-			if ((world.getWorldInfo().getGameTime() % 100) == 0) {
-				if (world.getRandom().nextDouble() > 0.25) {
-					BlockPos pos = new BlockPos(entity.getPosition());
-					pos = pos.add((world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1));
-					pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
-					EntityType<?>[] entities = new EntityType[]{
-							EntityType.ZOMBIE,
-							EntityType.SKELETON,
-							EntityType.SPIDER,
-							EntityType.CREEPER,
-					};
-					
-					for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
-						EntityType<?> type;
-						try {
-							type = entities[world.getRandom().nextInt(entities.length)];
-						} catch (Throwable ignored) {
-							type = entities[0];
-						}
-						
-						Entity e = type.create(entity.world);
-						
-						if (e != null) {
-							e.setPosition(pos.getX(), pos.getY(), pos.getZ());
-							
-							if (e instanceof SkeletonEntity) {
-								e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
-								e.setItemStackToSlot(EquipmentSlotType.MAINHAND, new ItemStack(Items.BOW));
-							} else if (e instanceof ZombieEntity)
-								e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.ZOMBIE_HEAD));
-							else if (e instanceof CreeperEntity)
-								e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.CREEPER_HEAD));
-							
-							e.setItemStackToSlot(EquipmentSlotType.FEET, new ItemStack(SpookyAutumnForests.nightmare_fuel, new Random().nextInt(3)));
-							
-							e.addTag("nightmare_mob");
-							
-							try {
-								if (e instanceof LivingEntity) {
-									if (type.getRegistryName().equals(new ResourceLocation("mystical_pumpkins:dragourd")))
-										((LivingEntity) e).setHealth(12);
-									else ((LivingEntity) e).setHealth(6);
-								}
-							} catch (Throwable ignored) {
-							}
-							
-							((ServerPlayerEntity) entity).connection.sendPacket(e.createSpawnPacket());
-							Nightmare.addNightmareEntity((PlayerEntity) entity, e);
-							
-							List<Pair<EquipmentSlotType, ItemStack>> p_i241270_2_ = ImmutableList.of(
-									Pair.of(EquipmentSlotType.FEET, new ItemStack(SpookyAutumnForests.nightmare_fuel)),
-									Pair.of(EquipmentSlotType.MAINHAND, ((LivingEntity) e).getHeldItem(Hand.MAIN_HAND))
-							);
-							
-							((ServerPlayerEntity) entity).connection.sendPacket(new SEntityEquipmentPacket(e.getEntityId(), p_i241270_2_));
-						}
-					}
-				}
-			}
-		}
+//		if (entity instanceof ServerPlayerEntity) {
+//			World world = entity.getEntityWorld();
+//
+//			if ((world.getWorldInfo().getGameTime() % 100) == 0) {
+//				if (world.getRandom().nextDouble() > 0.25) {
+//					BlockPos pos = new BlockPos(entity.getPosition());
+//					pos = pos.add((world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(32) + 32) * (world.getRandom().nextBoolean() ? -1 : 1));
+//					pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
+//					EntityType<?>[] entities = new EntityType[]{
+//							EntityType.ZOMBIE,
+//							EntityType.SKELETON,
+//							EntityType.SPIDER,
+//							EntityType.CREEPER,
+//					};
+//
+//					for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {
+//						EntityType<?> type;
+//						try {
+//							type = entities[world.getRandom().nextInt(entities.length)];
+//						} catch (Throwable ignored) {
+//							type = entities[0];
+//						}
+//
+//						Entity e = type.create(entity.world);
+//
+//						if (e != null) {
+//							e.setPosition(pos.getX(), pos.getY(), pos.getZ());
+//
+//							if (e instanceof SkeletonEntity) {
+//								e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.SKELETON_SKULL));
+//								e.setItemStackToSlot(EquipmentSlotType.MAINHAND, new ItemStack(Items.BOW));
+//							} else if (e instanceof ZombieEntity)
+//								e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.ZOMBIE_HEAD));
+//							else if (e instanceof CreeperEntity)
+//								e.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Items.CREEPER_HEAD));
+//
+//							e.setItemStackToSlot(EquipmentSlotType.FEET, new ItemStack(SpookyAutumnForests.nightmare_fuel, new Random().nextInt(3)));
+//
+//							e.addTag("nightmare_mob");
+//
+//							try {
+//								if (e instanceof LivingEntity) {
+//									if (type.getRegistryName().equals(new ResourceLocation("mystical_pumpkins:dragourd")))
+//										((LivingEntity) e).setHealth(12);
+//									else ((LivingEntity) e).setHealth(6);
+//								}
+//							} catch (Throwable ignored) {
+//							}
+//
+//							((ServerPlayerEntity) entity).connection.sendPacket(e.createSpawnPacket());
+//							Nightmare.addNightmareEntity((PlayerEntity) entity, e);
+//
+//							List<Pair<EquipmentSlotType, ItemStack>> p_i241270_2_ = ImmutableList.of(
+//									Pair.of(EquipmentSlotType.FEET, new ItemStack(SpookyAutumnForests.nightmare_fuel)),
+//									Pair.of(EquipmentSlotType.MAINHAND, ((LivingEntity) e).getHeldItem(Hand.MAIN_HAND))
+//							);
+//
+//							((ServerPlayerEntity) entity).connection.sendPacket(new SEntityEquipmentPacket(e.getEntityId(), p_i241270_2_));
+//						}
+//					}
+//				}
+//			}
+//		}
+		handleSpawns(entity, new EntityType[]{
+				EntityType.ZOMBIE,
+				EntityType.SKELETON,
+				EntityType.SPIDER,
+				EntityType.CREEPER,
+		});
 	}
 	
 	public static void handleSpawns(PlayerEntity entity, EntityType<?>[] spawns) {
 		if (entity instanceof ServerPlayerEntity) {
 			World world = entity.getEntityWorld();
 			
-			if ((world.getWorldInfo().getGameTime() % 100) == 0) {
-				if (world.getRandom().nextDouble() > 0.25) {
+			if ((world.getWorldInfo().getGameTime() % Config.getNightmareInterval()) == 0) {
+				if (world.getRandom().nextDouble() > Config.getNightmareChance()) {
 					BlockPos pos = new BlockPos(entity.getPosition());
-					int dist = 32;
-					pos = pos.add((world.getRandom().nextInt(dist) + dist) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(dist) + dist) * (world.getRandom().nextBoolean() ? -1 : 1));
+					
+					double dist = Config.getNightmareDist();
+					int range = Config.getNightmareRange();
+					
+					pos = pos.add((world.getRandom().nextInt(range) + dist) * (world.getRandom().nextBoolean() ? -1 : 1), 0, (world.getRandom().nextInt(range) + dist) * (world.getRandom().nextBoolean() ? -1 : 1));
 					pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos);
 					
 					for (int i = 0; i < world.getRandom().nextInt(3) + 1; i++) {

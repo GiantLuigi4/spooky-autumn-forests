@@ -107,7 +107,7 @@ dependencies {
 
     compile 'org.spongepowered:mixin:0.8'
 
-    compile fg.deobf("curse.maven:mystical-pumpkins:3104400")
+    compile fg.deobf("curse.maven:mystical-pumpkins:3108109")
     implementation fg.deobf("curse.maven:geckolib:3071704")
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
